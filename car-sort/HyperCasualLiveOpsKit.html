@@ -1,0 +1,120 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HyperCasualLiveOpsKit — Runtime Guide</title><style>body{margin:0;background:#101723;color:#e6edf7;font:16px/1.65 system-ui,sans-serif}header,main,nav{max-width:1040px;margin:auto;padding:24px}header{padding-bottom:0}h1{font-size:38px}h2{color:#8fded1}nav{display:flex;flex-wrap:wrap;gap:10px 24px;border-bottom:1px solid #354456}a{color:#a8c8ff}section{padding:12px 0 24px;scroll-margin-top:20px}code,pre{background:#1d2939;border-radius:6px}code{padding:2px 5px}pre{padding:16px;white-space:pre-wrap;overflow-wrap:anywhere}aside{border-left:4px solid #e4b668;padding:14px;background:#29251f}table{border-collapse:collapse;width:100%}td,th{text-align:left;border-bottom:1px solid #354456;padding:10px}@media(max-width:600px){header,main,nav{padding:16px}h1{font-size:30px}}
+/* Publishing review: readable narrow-width tables and paths. */
+main{min-width:0}table{width:100%;table-layout:fixed}td,th,code,a{overflow-wrap:anywhere}pre{max-width:100%;overflow:auto}
+</style></head><body><header><h1>HyperCasualLiveOpsKit — Runtime Guide</h1><p>Unity 6000.0.62f1 · Universal Render Pipeline · LocalQA handoff candidate</p><aside>Desktop gameplay and local builds have been exercised. Native-device acceptance, live providers, final artwork and owner-confirmed asset provenance remain open. This is not a production release certification.</aside></header><nav><a href="#overview">Overview</a><a href="#setup">Setup</a><a href="#systems">Included Systems</a><a href="#configuration">Configuration</a><a href="#validation">Validation and Limits</a><a href="#support">Support</a><a href="#legal">Licences and Notices</a><a href="#final-current-handoff">Current delivery</a><a href="#default-font-policy">Fonts</a></nav><main><section id="overview"><h2>Overview</h2><p>HyperCasualLiveOpsKit provides the starter menu, results overlays, local progression/economy, ads and purchase interfaces, power-up presentation and service configuration. This buyer projection contains runtime systems. AI integration/setup scripts and internal validation tools remain in the separate developer source kit.</p></section><section id="setup"><h2>Setup</h2><p>Use Unity 6000.0.62f1 with URP 17.0.4, Input System 1.14.2 and Unity UI 2.0.0. Import TMP Essential Resources. In the supplied Car Sort game, HLK_MainMenu precedes Campaign in build scenes and the game bridge is already connected. For a different game use the full developer kit and Phase02 saved adapter workflow; importing this buyer projection alone does not discover arbitrary game rules.</p></section><section id="systems"><h2>Included Systems</h2><p>The shared runtime includes menu/navigation, results, settings, coin/progression persistence, booster inventory and a development panel with level selection. Mock ads are dismissible and their overlays block underlying interaction. LocalQA purchase and rewarded-ad flows exercise UI/economy without certifying a live provider.</p><p>Keep each game adapter responsible for its own win/loss events and boosters. Do not replace working game mechanics to match the example.</p></section><section id="configuration"><h2>Configuration</h2><p>Inspect StarterMenuConfig and the HLK/PowerUps resources in the Inspector. Set scene names, visible level count, economy rewards and service selections deliberately. Real service IDs, consent policy, privacy URL, production signing and native-device acceptance are owner responsibilities. Back up saves before changing progression keys.</p></section><section id="validation"><h2>Validation and Limits</h2><p>The development source provides automated setup, economy/UI checks and build/release audits. The Car Sort Phase08 run passed desktop gameplay and local economy journeys and built a LocalQA ARM64 APK. Device startup, lifecycle, notches, Android back, real ads/IAP and audible listening remain unverified. Never treat a mock reward or build success as live-service acceptance.</p></section><section id="support"><h2>Support</h2><p>Contact <a href="mailto:satisvizion@gmail.com">satisvizion@gmail.com</a>. Include Unity version and reproducible steps, excluding account credentials. See AI-DISCLOSURE.txt for owner confirmation still required on earlier source assets.</p></section><section id="legal"><h2>Licences and Notices</h2><h3>LICENSE.md</h3><pre># License
+
+Unless the publisher supplies a separate written license with the product, this
+asset is distributed under the Unity Asset Store End User License Agreement that
+applies to the purchaser&#x27;s acquisition and use of the asset.
+
+Third-party packages, SDKs, examples, and notices retain their own licenses and
+terms. See `Third-Party Notices.md`. Provider names identify optional compatible
+services and do not grant a license to those providers&#x27; SDKs or services.
+
+This file does not replace purchase records, the applicable Asset Store terms,
+or a separately executed publisher/customer agreement.
+</pre><h3>Third-Party Notices.txt</h3><pre>HyperCasual LiveOps Kit — Third-Party Notices
+=============================================
+
+This package contains one third-party component. Its licence is reproduced in
+full below. Everything else in this package is original work by Satisvizion.
+
+
+-------------------------------------------------------------------------------
+1. Robert Penner&#x27;s Easing Equations — BSD 3-Clause License
+-------------------------------------------------------------------------------
+
+Component:  Easing curve shaping constants and curve parameterizations.
+Used in:    Assets/HyperCasualLiveOpsKit/Runtime/Core/Easing.cs
+
+What is derived: the conventional shaping constants and curve parameterizations
+of the back (overshoot), elastic (period/amplitude) and bounce (segment
+boundaries) easing families trace back to Robert Penner&#x27;s easing equations. The
+C# implementation in Easing.cs is Satisvizion&#x27;s own; the standard constants and
+curve shapes it reproduces originate with Robert Penner and are used under the
+BSD License reproduced below.
+
+No other file in this package derives from Robert Penner&#x27;s work.
+
+    TERMS OF USE - EASING EQUATIONS
+
+    Open source under the BSD License.
+
+    Copyright (c) 2001 Robert Penner
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are met:
+
+    1. Redistributions of source code must retain the above copyright notice,
+       this list of conditions and the following disclaimer.
+
+    2. Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer in the
+       documentation and/or other materials provided with the distribution.
+
+    3. Neither the name of the author nor the names of contributors may be used
+       to endorse or promote products derived from this software without
+       specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+    ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+    POSSIBILITY OF SUCH DAMAGE.
+
+The BSD 3-Clause License permits redistribution in source and binary form and
+is compatible with the Unity Asset Store End User License Agreement. It places
+no obligation on the end user of this package.
+
+
+-------------------------------------------------------------------------------
+2. Everything else in this package
+-------------------------------------------------------------------------------
+
+All other content is original work by Satisvizion, created for this package:
+
+  * C# source            Assets/HyperCasualLiveOpsKit/Runtime, /Editor, /Tests,
+                         /Demo, /StarterMenu, /PowerUps  (all HLK namespaces)
+  * Native plugin source HLKHaptics.mm, HLKNativeUI.mm, HLKPermissions.mm,
+                         HLKiCloud.mm, HLKShare.mm, HLKRateUs.mm,
+                         HlkShareBridge.java and the HLKHaptics.androidlib
+                         Android library project
+  * Audio                the 45 sound effects in AudioLibrary/Clips
+  * Art                  the 30 PNG textures in StarterMenu/Art,
+                         StarterMenu/Resources, PowerUps/Art
+  * Scenes, prefabs, ScriptableObject assets and presets
+
+No third-party fonts, audio, images, icons, shaders, DLLs or native binaries are
+redistributed in this package.
+
+
+-------------------------------------------------------------------------------
+3. Optional SDKs — referenced, never redistributed
+-------------------------------------------------------------------------------
+
+Several modules can integrate with third-party services. Their SDKs are NOT
+included in this package. Each integration is compiled only when you install
+that SDK yourself and enable the matching scripting define symbol, and the
+relevant code path is inert until you do:
+
+    HLK_APPSFLYER    AppsFlyer SDK             Attribution
+    HLK_LEVELPLAY    Unity LevelPlay           Ads mediation
+
+Installing any of these means accepting that vendor&#x27;s own licence terms, which
+are between you and the vendor. Satisfying them is not affected by this package,
+and nothing from those SDKs is distributed here.
+
+
+-------------------------------------------------------------------------------
+Contact
+-------------------------------------------------------------------------------
+
+Questions about licensing in this package: satisvizion@gmail.com
+</pre></section><section id="final-current-handoff"><h2>Current delivery and examples</h2><p>Unity 6000.0.62f1 / URP. Support: <a href="mailto:satisvizion@gmail.com">satisvizion@gmail.com</a>.</p><p>Buyer roots: Assets/_CarSort, Assets/HyperCasualLiveOpsKit. Internal production, build and upload folders are excluded. The kit is an owner-approved first-party asset.</p><p>Hosting, native-device tests and live-service verification are separately recorded in the delivery handoff. A local build is not proof of a hosted release.</p></section><section id="default-font-policy"><h2>Fonts</h2><p>Unity-provided defaults only: TextMesh Pro default font for TMP text and LegacyRuntime.ttf for legacy Unity UI. Official TMP Essentials must be installed. Do not add custom font files or atlases. Any historical custom-font references above describe an older revision; they are not current dependencies.</p></section></main></body></html>
