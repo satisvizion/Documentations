@@ -1,0 +1,818 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Beads Out — Buyer Guide</title><style>body{margin:0;background:#161b2e;color:#ecf0fb;font:16px/1.65 system-ui,sans-serif}header,main,nav{max-width:1040px;margin:auto;padding:24px}header{padding-bottom:0}h1{font-size:38px}h2{color:#7fc4ff}nav{display:flex;flex-wrap:wrap;gap:10px 24px;border-bottom:1px solid #34406a}a{color:#9fd4ff}section{padding:12px 0 24px;scroll-margin-top:20px}code,pre{background:#222a45;border-radius:6px}code{padding:2px 5px}pre{padding:16px;white-space:pre-wrap;overflow-wrap:anywhere}aside{border-left:4px solid #7fc4ff;padding:14px;background:#1f2742}table{border-collapse:collapse;width:100%}td,th{text-align:left;border-bottom:1px solid #34406a;padding:10px;vertical-align:top}@media(max-width:600px){header,main,nav{padding:16px}h1{font-size:30px}}
+/* Publishing review: readable narrow-width tables and paths. */
+main{min-width:0}table{width:100%;table-layout:fixed}td,th,code,a{overflow-wrap:anywhere}pre{max-width:100%;overflow:auto}
+</style></head><body><header><h1>Beads Out — Buyer Guide</h1><p>Unity 6000.0.62f1 · Universal Render Pipeline · LocalQA handoff candidate</p><aside>Desktop gameplay, the level tools and local Windows/Android builds have been exercised. Native-device acceptance, live ad/billing providers, original sound authorship review, human difficulty balancing and owner-confirmed asset provenance remain open. This is not a production release certification.</aside></header><nav><a href="#overview">Overview</a><a href="#getting-started">Getting Started</a><a href="#folders">Folder Structure</a><a href="#gameplay">Gameplay</a><a href="#scripts">Scripts Reference</a><a href="#editor">Level Editor</a><a href="#generator">Automatic Level Generator</a><a href="#boosters">Boosters</a><a href="#variation">Level Variation</a><a href="#customization">Customization Guide</a><a href="#format">Level Format</a><a href="#support">Support</a><a href="#legal">Licences and Notices</a><a href="#final-current-handoff">Current delivery</a><a href="#default-font-policy">Fonts</a></nav><main>
+<section id="overview"><h2>Overview</h2><p>Beads Out is a portrait bead-sorting puzzle with 500 levels. A conveyor belt of beads (80 rows of six) turns around a loop past a spout. Tap a box in the tray: it flies to the lowest free shelf slot, and every belt row of its colour that passes the spout pours into it. A full box flies away and frees its slot. Side feeder arms drop their queued rows into empty belt rows. Fill every box to win. If the shelf is full and nothing pours or enters the belt for a whole lap, the level offers one recovery (the newest box returns to the tray); the next stall loses. Level 1 (the tutorial) and level 200 are the two recorded boards of the original game; the other 498 are generated from a saved seed.</p></section>
+<section id="getting-started"><h2>Getting Started</h2><ol><li>Create or open a Unity 6000.0.62f1 project that uses the Universal Render Pipeline, the Input System package (<code>activeInputHandler</code> = Input System or Both), Unity UI and the Test Framework. Import TextMesh Pro Essential Resources when prompted.</li><li>Import this package. Two roots appear: <code>Assets/Game</code> (game, scene, levels, tools) and <code>Assets/HyperCasualLiveOpsKit</code> (menu, economy, LiveOps, boosters).</li><li>Assign a URP pipeline asset in Graphics/Quality settings (the tested PC/Mobile assets are in <code>Assets/Game/ProjectRenderSettings</code>) and set <em>Player → Color Space</em> to <strong>Linear</strong>.</li><li>Add <code>Assets/HyperCasualLiveOpsKit/StarterMenu/Scenes/HLK_MainMenu.unity</code> first and <code>Assets/Game/Scenes/Game.unity</code> second to the build list, open the menu scene and press Play. Choose a level or press Play Next Level.</li><li>Open <strong>Tools → Beads Out → Documentation</strong> for this guide, <strong>Level Editor</strong> / <strong>Auto Level Generator</strong> for the tools.</li></ol></section>
+<section id="folders"><h2>Folder Structure</h2><table><tr><th>Folder</th><th>Contents</th></tr><tr><td><code>Game/Scripts/Core</code></td><td>Pure C# rules: <code>Sim</code> (100 Hz simulation), <code>LevelData</code> (JSON contract), <code>Witness</code> (tap sequences, replay, solver, players, losing routes), <code>MiniJson</code>.</td></tr><tr><td><code>Game/Scripts/Game</code>, <code>Game/Scripts/UI</code>, <code>Game/Scripts/Models</code></td><td>Presentation: viewport/camera fit, track geometry, board, beads and box views, lock, HUD, models, the level catalog.</td></tr><tr><td><code>Game/Integration</code></td><td>The HLK bridge (level selection, pointer gating, runtime fit between the kit HUD and booster shelf, single reward settlement, analytics, audio cues) and the booster adapter.</td></tr><tr><td><code>Game/Resources/Levels</code></td><td><code>Level_1.json</code> … <code>Level_500.json</code> plus <code>CampaignAuthoring.json</code> (editor metadata, never a level).</td></tr><tr><td><code>Game/Resources/LevelSources</code></td><td>The two recorded levels, unchanged, used as authored sources for slots 1 and 200 and as the geometry templates of the two tracks.</td></tr><tr><td><code>Game/Resources/NativeModels</code>, <code>Materials</code>, <code>Shaders</code>, <code>Art</code></td><td>Track rings, feeder arm, spout, bead, box and lid models; materials; the glossy bead shader; coin, hand and key images.</td></tr><tr><td><code>Game/Art/Boosters</code></td><td>Centre icon and tutorial illustration of each of the three boosters, bound by booster id in the power-up definitions.</td></tr><tr><td><code>Game/LevelTools</code>, <code>Game/ProductionLevelTools</code></td><td>Beads Out editor/generator adapter and the shared level-tool framework (editor only).</td></tr><tr><td><code>Game/Scenes/Game.unity</code></td><td>The gameplay scene (GameRoot, EventSystem, kit gameplay overlay).</td></tr></table></section>
+<section id="gameplay"><h2>Gameplay</h2><p>Two tracks come from the recordings: the <strong>tall</strong> Level 1 track (no feeders) and the <strong>wide</strong> Level 200 track with two feeder arms. The loop itself is level data: a level either keeps the recorded ring or stores its own closed path, one of 13 silhouettes (rounded square, round, broad low loop, hourglass, tilted pear, rounded triangle, domed/flat, kidney, leaning, rounded diamond, D, heart, S-bend). The same belt rules apply on every loop - 80 rows of six beads, one spout under the bottom, feeder arms joining on their own side - and the loop is drawn with the same procedural channel, rims and chevrons. Trays are stepped stacks of one to five box rows on one shared column grid: stacks that narrow downwards are centred (the two recorded trays), other row profiles are left-aligned. A chain (padlock) covers the bottom row of a tray, or its bottom two rows from four-row trays, and opens 1.25 s after its key box is sent. Losing opportunities come from <em>feeder-only colours</em>: a colour that starts only in a feeder arrives after other colours empty belt rows, so parking it early fills the shelf. Tutorials point the kit's shared tutorial hand at the guided box, with a one-line instruction in a capsule above the board (level 1 boxes, level 8 side belts, level 46 key). Pause, settings, results, rewards and the booster shelf are the kit's; win results appear after the game's own completion celebration.</p></section>
+<section id="scripts"><h2>Scripts Reference</h2><table><tr><th>Script</th><th>Role</th></tr><tr><td><code>Sim</code></td><td>Taps, shelf slots, belt rotation, pours, feeders, lock, boosters (<code>AddSlot</code>, Move any, <code>FillBlock</code>), stall recovery and the loss, win/celebration phases, published snapshot.</td></tr><tr><td><code>LevelData</code></td><td>Parses and validates a level (bead conservation per colour, ring/spout/junction rows, optional loop path, track, tutorial and key references).</td></tr><tr><td><code>RingCurve</code></td><td>The loop centreline of a level (recorded ring or saved control points through a closed Catmull-Rom), with the belt rows at equal arc steps and the spout row on the loop bottom; shared by the runtime track, the editor and the validator.</td></tr><tr><td><code>Witness</code></td><td>Parses/formats <code>step:boxId</code> certificates, replays them through the real Sim, the greedy solver with bounded branch search, seeded random/careless players and the fixed losing route.</td></tr><tr><td><code>GameController</code></td><td>Builds a level, routes pointer presses into the Sim, steps it on the fixed clock, drives the views; host hooks for the kit shell.</td></tr><tr><td><code>Viewport</code></td><td>Maps the portrait column to screen and ground; fits the level between the host HUD and controls (<code>HostPlayArea</code>).</td></tr><tr><td><code>BeadsHlkBridge</code>, <code>BeadsPowerUpAdapter</code></td><td>Kit integration: level selection, settlement, analytics, audio; booster handlers, arming and availability.</td></tr><tr><td><code>BeadsBoards</code>, <code>BeadsProgression</code>, <code>BeadsLevelRules</code>, <code>BeadsCampaignRules</code>, <code>GameAdapter</code></td><td>Editor: board builder, chapter plan and schedule, keys and checks, campaign rules, the shared-tool adapter.</td></tr><tr><td><code>BeadsPaths</code>, <code>BeadsPathCatalog</code></td><td>Editor: the loop catalog (control points per silhouette and track), the loop schedule, feeder re-attachment and loop checks (bend radius, length, fit, spout, arm clearance).</td></tr></table></section>
+<section id="editor"><h2>Level Editor</h2><p><strong>Tools → Beads Out → Level Editor</strong> lists the campaign with Undo, duplicate, delete and reorder, a spatial canvas and an exact JSON view. The canvas draws the loop on its real centreline with flow arrows, every starting belt row in its colour, the feeder queues and their junctions, the shelf slots and the tray boxes with the key icon and chain. Tools: paint a box, paint five belt rows, move a box into or out of the chained zone, choose the key box; pick the tray formation, the shelf size (3-5 slots), the box capacity (20 or 10 rows) and the loop (a catalog preset, copied into this level only). The <em>Loop points</em> tool drags the loop's control points, double-click on the loop inserts one, right-click removes one, shift-click moves that side's feeder junction; the arms re-attach after every edit and a warning names any loop rule that fails. Edits clear the witness; saving re-solves, validates bead conservation, overlaps and the campaign rules, and publishes through staging. <em>Play</em> opens the saved level through the normal menu flow.</p></section>
+<section id="generator"><h2>Automatic Level Generator</h2><p><strong>Tools → Beads Out → Auto Level Generator</strong> uses the saved request (count, seed, attempts, minimum formations, streak limit, append/replace). Generation is deterministic: the same request yields the same campaign. Each candidate is built from its chapter blueprint, solved, replayed through the Sim and checked for duplicates, formation streaks and chapter rules; the loop silhouette follows its own seeded schedule (recorded ring at levels 1, 8 and 200, the reference shapes at levels 27, 42, 45, 48 and 78, otherwise no silhouette again within two levels); bounded retries never weaken constraints, and a failure leaves the published JSON unchanged. Append mode keeps every existing level and adds new ones to the target count.</p></section>
+<section id="boosters"><h2>Boosters</h2><table><tr><th>Booster</th><th>Effect</th><th>Unlock / free charges</th></tr><tr><td>Extra Slot</td><td>Adds one shelf slot for this level (up to six).</td><td>Level 2 · 2 once</td></tr><tr><td>Move Any</td><td>Targeted: tap any tray box, even a chained one, to send it; with a full shelf the newest box returns to the tray. Tap the booster again to cancel.</td><td>Level 7 · 2 once</td></tr><tr><td>Fill</td><td>Pulls matching beads from the belt and feeders into the first unfinished shelf box.</td><td>Level 12 · 2 once</td></tr></table><p>The effects are the V2 developer's; the kit supplies inventory, first-use tutorials, arming, audio and DEV unlock/refill/tutorial controls.</p><p><strong>Progression and refills.</strong> A booster unlocks permanently when a real win makes its level reachable (completing level 1 unlocks Extra Slot for level 2) and stays usable on earlier replays; on that first unlock it grants two free charges, once per booster and never per level. Each successful effect costs one charge; a refused, cancelled or invalid use costs nothing. At zero the button shows a gray icon with a white 0 and opens the kit's <em>GET ANOTHER BOOST</em> popup: <em>BUY +1</em> for 100 coins plus 25 per 10 levels of real progress (no replay discount), or <em>WATCH AD +1</em> on the booster's rewarded placement (<code>booster_refill_&lt;id&gt;</code>). A refill adds one charge and closes the popup without firing the booster; skipped, failed or unavailable ads grant nothing, and every purchase is journaled so an interrupted transaction is settled exactly once on the next launch. DEV level jumps and DEV refills never grant charges or record progress. Inventory is saved per profile (<code>HLK.beads-out.&lt;profile&gt;.Booster.*</code>); older saved counts are migrated, not reset.</p></section>
+<section id="variation"><h2>Level Variation</h2><table><tr><th>Levels</th><th>Chapter</th><th>What changes</th></tr><tr><td>1</td><td>Tutorial</td><td>Recorded Level 1.</td></tr><tr><td>2-7</td><td>Tap and fill</td><td>Tall track, new tray shapes, everything on the belt.</td></tr><tr><td>8-20</td><td>Side feeders</td><td>Wide track; feeders refill emptied rows (level 8 guided).</td></tr><tr><td>21-45</td><td>Plan the belt</td><td>Feeder-only colours; parking them early fills the shelf.</td></tr><tr><td>46-70</td><td>Key and chain</td><td>Chained bottom rows (level 46 guided key tap).</td></tr><tr><td>71-120</td><td>Mixed belt</td><td>Shorter colour runs, repeated colours.</td></tr><tr><td>121-190</td><td>Three slots</td><td>Three-slot shelves (level 121 introduction).</td></tr><tr><td>191-280</td><td>Level 200 scale</td><td>Recorded Level 200 size (authored level 200).</td></tr><tr><td>281-380</td><td>Small boxes</td><td>10-row boxes double the tray (level 281 introduction).</td></tr><tr><td>381-500</td><td>Master</td><td>Everything combined.</td></tr></table><p>Every level ending in 5 from 25 is a lighter relief level. From level 21 the box and colour counts rise toward those seen in later levels of the original game, up to 20 boxes and 13 colours in the Master chapter, with belt colour runs of 5-10 rows. The shipped campaign has 499 distinct tray/track/chain/feeder/loop formations (378 tray row profiles) and never repeats a formation on consecutive levels (the generator allows at most two in a row). The loop varies separately: all 13 silhouettes appear in every chapter from level 21, a silhouette never returns within two levels, and every 20-level window shows at least 11 of them.</p></section>
+<section id="customization"><h2>Customization Guide</h2><ul><li><strong>Difficulty:</strong> edit <code>BeadsProgression.Chapters</code> (boxes, colours, feeder-only share, chain chance, shelf and capacity mixes, run lengths) and regenerate with a new seed, or hand-edit levels in the editor.</li><li><strong>Colours:</strong> <code>BeadsBoards.Colours</code> / <code>Hex</code> list the thirteen recorded bead colours; look-alike families are kept apart early.</li><li><strong>Tray shapes:</strong> a tray is a row profile (<code>TrayShape</code>, boxes per row, e.g. <code>5-5-4-2</code>). <code>BeadsBoards.Shapes</code> enumerates the profiles each track allows from its measured grid (<code>TallGrid</code>: up to 2 rows / 8 boxes, <code>WideGrid</code>: up to 5 rows / 20 boxes); <code>ChainRows</code> sets the chained rows. New profiles raise formation variety automatically.</li><li><strong>Loops:</strong> reshape one level with the <em>Loop points</em> tool, or add a silhouette to <code>BeadsPathCatalog.Families</code> (40 column u,v control points per track); <code>BeadsPaths.Check</code> accepts it when it bends no tighter than the channel, keeps 94-112% of the recorded loop length (same rows and bead size), stays inside the recorded track band and leaves room for both feeder arms. <code>BeadsPaths.Schedule</code> places the silhouettes in the campaign.</li><li><strong>Boosters:</strong> unlock levels, the one-time grant, refill amount, prices and rewarded placements live in <code>Game/Resources/HLK/BoosterProgression.json</code> (the file the player loads; it sets each definition's unlock level at start-up and is validated against the power-up catalog). Names, icons and tutorials are in the definition assets (<code>Game/Integration/PowerUps</code>); effects in <code>Sim.AddSlot</code>, <code>Sim.TapBox</code> (Move any) and <code>Sim.FillBlock</code>. The kit's <code>PowerUps/BOOSTER-PROGRESSION.md</code> and <code>BOOSTER-REFILL-UI.md</code> describe the shared policy and popup.</li><li><strong>Rewards, ads, LiveOps:</strong> see the HyperCasualLiveOpsKit guide.</li><li><strong>DEV panel:</strong> the orange DEV button is a development tool; hide it for store builds with <code>StarterGameplayDevPanel.IsAvailable = false</code>.</li></ul></section>
+<section id="format"><h2>Level Format</h2><p>Each <code>Level_N.json</code> holds the track data (column size, ring rectangle, spout, feeder arm paths and junction rows), the optional loop <code>ring.path</code> (<code>id</code> = catalog silhouette, a trailing <code>*</code> marks a hand-edited copy; <code>points</code> = closed control points as column fractions; absent = the recorded ring), the palette, <code>ring.rows0</code> (80 belt rows, clockwise from the top; <code>null</code> = empty), each feeder's <code>rows0</code> queue (first row nearest the junction), <code>box.capacityRows</code>, the shelf slot rectangles, the tray (plate, cut-out with one rectangle per row block, boxes with grid cell, rectangle, colour, <code>locked</code>, <code>key</code>), the optional <code>lock</code>, the <code>tutorial</code> (guided box ids, caption, <code>hint</code>), HUD/result data, <code>track</code> (<code>tall</code> or <code>wide</code>), plus <code>index</code> and the <code>witness</code> (<code>step:boxId</code> taps on the 100 Hz clock). Rectangles are fractions of the portrait column (x right, y down). Current level 4 (complete):</p><pre>{
+  &quot;levelId&quot;: &quot;Level_4&quot;,
+  &quot;levelNumber&quot;: 4,
+  &quot;title&quot;: &quot;Level 4&quot;,
+  &quot;column&quot;: {
+    &quot;width&quot;: 474,
+    &quot;height&quot;: 1080,
+    &quot;sourceFrame&quot;: [
+      1440,
+      1080
+    ],
+    &quot;sourceCrop&quot;: [
+      0.3347,
+      0,
+      0.6639,
+      1
+    ],
+    &quot;fps&quot;: 60
+  },
+  &quot;palette&quot;: {
+    &quot;background&quot;: &quot;#ABC7FB&quot;,
+    &quot;backgroundFooter&quot;: &quot;#83ACEE&quot;,
+    &quot;rim&quot;: &quot;#425ABD&quot;,
+    &quot;channel&quot;: &quot;#A8A8B1&quot;,
+    &quot;slot&quot;: &quot;#D5DCF4&quot;,
+    &quot;trayPlate&quot;: &quot;#8FA4DE&quot;,
+    &quot;yellow&quot;: &quot;#FFE322&quot;,
+    &quot;green&quot;: &quot;#3BF218&quot;,
+    &quot;red&quot;: &quot;#FF2141&quot;,
+    &quot;blue&quot;: &quot;#078DFF&quot;
+  },
+  &quot;ring&quot;: {
+    &quot;rows&quot;: 80,
+    &quot;spoutRow&quot;: 40,
+    &quot;beadsPerRow&quot;: 6,
+    &quot;rowPitchPx&quot;: 11.5,
+    &quot;foreshortening&quot;: 0.82,
+    &quot;rows0&quot;: [
+      &quot;blue&quot;,
+      &quot;blue&quot;,
+      &quot;blue&quot;,
+      &quot;blue&quot;,
+      &quot;blue&quot;,
+      &quot;blue&quot;,
+      &quot;blue&quot;,
+      &quot;blue&quot;,
+      &quot;blue&quot;,
+      &quot;blue&quot;,
+      null,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      null,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      null,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      null,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      null,
+      null,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      null,
+      null,
+      &quot;red&quot;,
+      &quot;red&quot;,
+      &quot;red&quot;,
+      &quot;red&quot;,
+      &quot;red&quot;,
+      &quot;red&quot;,
+      &quot;red&quot;,
+      &quot;red&quot;,
+      &quot;red&quot;,
+      &quot;red&quot;,
+      null,
+      null
+    ],
+    &quot;screen&quot;: {
+      &quot;cx&quot;: 0.5011,
+      &quot;cy&quot;: 0.3907,
+      &quot;hw&quot;: 0.2089,
+      &quot;hh&quot;: 0.1245,
+      &quot;rx&quot;: 0.1646,
+      &quot;ry&quot;: 0.0593,
+      &quot;outerRimPx&quot;: 8,
+      &quot;channelPx&quot;: 50
+    },
+    &quot;spoutScreen&quot;: {
+      &quot;x&quot;: 0.4557,
+      &quot;y&quot;: 0.5417,
+      &quot;w&quot;: 0.0928,
+      &quot;h&quot;: 0.0398
+    }
+  },
+  &quot;feeders&quot;: [],
+  &quot;conveyor&quot;: {
+    &quot;slowRowsPerSec&quot;: 7.5,
+    &quot;fastMultiplier&quot;: 2,
+    &quot;speedUpDelayAfterTutorial&quot;: 0.6,
+    &quot;speedUpRamp&quot;: 0.45
+  },
+  &quot;box&quot;: {
+    &quot;capacityRows&quot;: 10,
+    &quot;flyToShelf&quot;: 0.2,
+    &quot;armDelay&quot;: 0.2,
+    &quot;beadFlight&quot;: 0.25,
+    &quot;fullGlow&quot;: 0.3,
+    &quot;slotFreeAfterFull&quot;: 0.3,
+    &quot;flyAway&quot;: 0.6,
+    &quot;goneAfterFull&quot;: 0.9,
+    &quot;percentStep&quot;: 5
+  },
+  &quot;shelf&quot;: {
+    &quot;slots&quot;: [
+      {
+        &quot;x&quot;: 0.1709,
+        &quot;y&quot;: 0.613,
+        &quot;w&quot;: 0.154,
+        &quot;h&quot;: 0.0565
+      },
+      {
+        &quot;x&quot;: 0.3418,
+        &quot;y&quot;: 0.613,
+        &quot;w&quot;: 0.154,
+        &quot;h&quot;: 0.0565
+      },
+      {
+        &quot;x&quot;: 0.5084,
+        &quot;y&quot;: 0.613,
+        &quot;w&quot;: 0.154,
+        &quot;h&quot;: 0.0565
+      },
+      {
+        &quot;x&quot;: 0.6793,
+        &quot;y&quot;: 0.613,
+        &quot;w&quot;: 0.154,
+        &quot;h&quot;: 0.0565
+      }
+    ]
+  },
+  &quot;tray&quot;: {
+    &quot;plate&quot;: [
+      {
+        &quot;x&quot;: 0,
+        &quot;y&quot;: 0.7037,
+        &quot;w&quot;: 1,
+        &quot;h&quot;: 0.25
+      }
+    ],
+    &quot;cutout&quot;: [
+      {
+        &quot;x&quot;: 0.0669,
+        &quot;y&quot;: 0.7037,
+        &quot;w&quot;: 0.8662,
+        &quot;h&quot;: 0.0953
+      },
+      {
+        &quot;x&quot;: 0.1389,
+        &quot;y&quot;: 0.799,
+        &quot;w&quot;: 0.7222,
+        &quot;h&quot;: 0.0834
+      }
+    ],
+    &quot;boxes&quot;: [
+      {
+        &quot;id&quot;: &quot;box-yellow-1&quot;,
+        &quot;colour&quot;: &quot;yellow&quot;,
+        &quot;cell&quot;: &quot;r1c1&quot;,
+        &quot;rect&quot;: {
+          &quot;x&quot;: 0.1329,
+          &quot;y&quot;: 0.7083,
+          &quot;w&quot;: 0.1582,
+          &quot;h&quot;: 0.0648
+        },
+        &quot;locked&quot;: false,
+        &quot;key&quot;: false
+      },
+      {
+        &quot;id&quot;: &quot;box-yellow-2&quot;,
+        &quot;colour&quot;: &quot;yellow&quot;,
+        &quot;cell&quot;: &quot;r1c2&quot;,
+        &quot;rect&quot;: {
+          &quot;x&quot;: 0.3249,
+          &quot;y&quot;: 0.7083,
+          &quot;w&quot;: 0.1582,
+          &quot;h&quot;: 0.0648
+        },
+        &quot;locked&quot;: false,
+        &quot;key&quot;: false
+      },
+      {
+        &quot;id&quot;: &quot;box-green-1&quot;,
+        &quot;colour&quot;: &quot;green&quot;,
+        &quot;cell&quot;: &quot;r1c3&quot;,
+        &quot;rect&quot;: {
+          &quot;x&quot;: 0.5169,
+          &quot;y&quot;: 0.7083,
+          &quot;w&quot;: 0.1582,
+          &quot;h&quot;: 0.0648
+        },
+        &quot;locked&quot;: false,
+        &quot;key&quot;: false
+      },
+      {
+        &quot;id&quot;: &quot;box-yellow-3&quot;,
+        &quot;colour&quot;: &quot;yellow&quot;,
+        &quot;cell&quot;: &quot;r1c4&quot;,
+        &quot;rect&quot;: {
+          &quot;x&quot;: 0.7089,
+          &quot;y&quot;: 0.7083,
+          &quot;w&quot;: 0.1582,
+          &quot;h&quot;: 0.0648
+        },
+        &quot;locked&quot;: false,
+        &quot;key&quot;: false
+      },
+      {
+        &quot;id&quot;: &quot;box-green-2&quot;,
+        &quot;colour&quot;: &quot;green&quot;,
+        &quot;cell&quot;: &quot;r2c1&quot;,
+        &quot;rect&quot;: {
+          &quot;x&quot;: 0.2289,
+          &quot;y&quot;: 0.8009,
+          &quot;w&quot;: 0.1582,
+          &quot;h&quot;: 0.0648
+        },
+        &quot;locked&quot;: false,
+        &quot;key&quot;: false
+      },
+      {
+        &quot;id&quot;: &quot;box-red-1&quot;,
+        &quot;colour&quot;: &quot;red&quot;,
+        &quot;cell&quot;: &quot;r2c2&quot;,
+        &quot;rect&quot;: {
+          &quot;x&quot;: 0.4209,
+          &quot;y&quot;: 0.8009,
+          &quot;w&quot;: 0.1582,
+          &quot;h&quot;: 0.0648
+        },
+        &quot;locked&quot;: false,
+        &quot;key&quot;: false
+      },
+      {
+        &quot;id&quot;: &quot;box-blue-1&quot;,
+        &quot;colour&quot;: &quot;blue&quot;,
+        &quot;cell&quot;: &quot;r2c3&quot;,
+        &quot;rect&quot;: {
+          &quot;x&quot;: 0.6129,
+          &quot;y&quot;: 0.8009,
+          &quot;w&quot;: 0.1582,
+          &quot;h&quot;: 0.0648
+        },
+        &quot;locked&quot;: false,
+        &quot;key&quot;: false
+      }
+    ]
+  },
+  &quot;lock&quot;: null,
+  &quot;tutorial&quot;: {
+    &quot;caption&quot;: &quot;&quot;,
+    &quot;captionRect&quot;: {
+      &quot;x&quot;: 0.1266,
+      &quot;y&quot;: 0.463,
+      &quot;w&quot;: 0.7468,
+      &quot;h&quot;: 0.0787
+    },
+    &quot;captionUntilStep&quot;: 0,
+    &quot;steps&quot;: [],
+    &quot;handTapPeriod&quot;: 0.5,
+    &quot;hint&quot;: &quot;&quot;
+  },
+  &quot;hud&quot;: {
+    &quot;levelPill&quot;: {
+      &quot;x&quot;: 0.3966,
+      &quot;y&quot;: 0.0602,
+      &quot;w&quot;: 0.211,
+      &quot;h&quot;: 0.0398
+    },
+    &quot;coinPill&quot;: {
+      &quot;x&quot;: 0.7722,
+      &quot;y&quot;: 0.0602,
+      &quot;w&quot;: 0.2278,
+      &quot;h&quot;: 0.0444
+    },
+    &quot;gear&quot;: {
+      &quot;x&quot;: 0.0464,
+      &quot;y&quot;: 0.0602,
+      &quot;w&quot;: 0.0928,
+      &quot;h&quot;: 0.0398
+    },
+    &quot;coins&quot;: 500,
+    &quot;boosters&quot;: [
+      {
+        &quot;x&quot;: 0.2743,
+        &quot;locked&quot;: true,
+        &quot;label&quot;: &quot;Level 6&quot;
+      },
+      {
+        &quot;x&quot;: 0.5173,
+        &quot;locked&quot;: true,
+        &quot;label&quot;: &quot;Level 8&quot;
+      },
+      {
+        &quot;x&quot;: 0.7512,
+        &quot;locked&quot;: true,
+        &quot;label&quot;: &quot;Level 11&quot;
+      }
+    ],
+    &quot;boosterY&quot;: 0.94
+  },
+  &quot;result&quot;: {
+    &quot;title&quot;: &quot;Congrats&quot;,
+    &quot;nextReward&quot;: 25,
+    &quot;newFeatureFrom&quot;: 0,
+    &quot;newFeatureTo&quot;: 0,
+    &quot;adButton&quot;: null,
+    &quot;awesomeBanner&quot;: false,
+    &quot;confettiFromCompletion&quot;: 2,
+    &quot;celebrationSparkle&quot;: 1.1,
+    &quot;dimAt&quot;: 1.2,
+    &quot;titleAt&quot;: 1.3,
+    &quot;buttonAt&quot;: 1.8,
+    &quot;nextRect&quot;: {
+      &quot;x&quot;: 0.3165,
+      &quot;y&quot;: 0.6157,
+      &quot;w&quot;: 0.3692,
+      &quot;h&quot;: 0.0509
+    }
+  },
+  &quot;evidence&quot;: {
+    &quot;originTimestamp&quot;: 0,
+    &quot;durationMs&quot;: 0,
+    &quot;generated&quot;: true
+  },
+  &quot;track&quot;: &quot;tall&quot;,
+  &quot;provenance&quot;: {
+    &quot;chapter&quot;: &quot;Tap and fill&quot;,
+    &quot;formation&quot;: &quot;tall|4-3|open|f0&quot;,
+    &quot;relief&quot;: false,
+    &quot;seed&quot;: 1756478264
+  },
+  &quot;index&quot;: 4,
+  &quot;witness&quot;: &quot;0:box-yellow-1;1:box-yellow-2;2:box-green-1;3:box-yellow-3;183:box-green-2;265:box-red-1;498:box-blue-1&quot;
+}</pre></section>
+<section id="support"><h2>Support</h2><p>Questions and bug reports: <a href="mailto:satisvizion@gmail.com">satisvizion@gmail.com</a>. Please include the Unity version, the level number and the editor console output.</p></section>
+<section id="legal"><h2>Licences and Notices</h2><p>No additional licence notices were found in this root. Owner provenance confirmation remains required.</p></section>
+<section id="final-current-handoff"><h2>Current delivery and examples</h2><p>Unity 6000.0.62f1 / URP. Support: <a href="mailto:satisvizion@gmail.com">satisvizion@gmail.com</a>.</p><p>Buyer roots: Assets/Game, Assets/HyperCasualLiveOpsKit. Internal production, build and upload folders are excluded. The kit is an owner-approved first-party asset.</p><p>Current campaign: 500 levels. Use the shipped Level Editor and Auto Level Generator menu entries: Tools/Beads Out/Documentation, Tools/Beads Out/Level Editor, Tools/Beads Out/Auto Level Generator.</p><h3>Current complete level example</h3><p>Assets/Game/Resources/Levels/Level_4.json</p><pre>{
+  &quot;levelId&quot;: &quot;Level_4&quot;,
+  &quot;levelNumber&quot;: 4,
+  &quot;title&quot;: &quot;Level 4&quot;,
+  &quot;column&quot;: {
+    &quot;width&quot;: 474,
+    &quot;height&quot;: 1080,
+    &quot;sourceFrame&quot;: [
+      1440,
+      1080
+    ],
+    &quot;sourceCrop&quot;: [
+      0.3347,
+      0,
+      0.6639,
+      1
+    ],
+    &quot;fps&quot;: 60
+  },
+  &quot;palette&quot;: {
+    &quot;background&quot;: &quot;#ABC7FB&quot;,
+    &quot;backgroundFooter&quot;: &quot;#83ACEE&quot;,
+    &quot;rim&quot;: &quot;#425ABD&quot;,
+    &quot;channel&quot;: &quot;#A8A8B1&quot;,
+    &quot;slot&quot;: &quot;#D5DCF4&quot;,
+    &quot;trayPlate&quot;: &quot;#8FA4DE&quot;,
+    &quot;yellow&quot;: &quot;#FFE322&quot;,
+    &quot;green&quot;: &quot;#3BF218&quot;,
+    &quot;red&quot;: &quot;#FF2141&quot;,
+    &quot;blue&quot;: &quot;#078DFF&quot;
+  },
+  &quot;ring&quot;: {
+    &quot;rows&quot;: 80,
+    &quot;spoutRow&quot;: 40,
+    &quot;beadsPerRow&quot;: 6,
+    &quot;rowPitchPx&quot;: 11.5,
+    &quot;foreshortening&quot;: 0.82,
+    &quot;rows0&quot;: [
+      &quot;blue&quot;,
+      &quot;blue&quot;,
+      &quot;blue&quot;,
+      &quot;blue&quot;,
+      &quot;blue&quot;,
+      &quot;blue&quot;,
+      &quot;blue&quot;,
+      &quot;blue&quot;,
+      &quot;blue&quot;,
+      &quot;blue&quot;,
+      null,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      null,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      null,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      null,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      &quot;green&quot;,
+      null,
+      null,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      &quot;yellow&quot;,
+      null,
+      null,
+      &quot;red&quot;,
+      &quot;red&quot;,
+      &quot;red&quot;,
+      &quot;red&quot;,
+      &quot;red&quot;,
+      &quot;red&quot;,
+      &quot;red&quot;,
+      &quot;red&quot;,
+      &quot;red&quot;,
+      &quot;red&quot;,
+      null,
+      null
+    ],
+    &quot;screen&quot;: {
+      &quot;cx&quot;: 0.5011,
+      &quot;cy&quot;: 0.3907,
+      &quot;hw&quot;: 0.2089,
+      &quot;hh&quot;: 0.1245,
+      &quot;rx&quot;: 0.1646,
+      &quot;ry&quot;: 0.0593,
+      &quot;outerRimPx&quot;: 8,
+      &quot;channelPx&quot;: 50
+    },
+    &quot;spoutScreen&quot;: {
+      &quot;x&quot;: 0.4557,
+      &quot;y&quot;: 0.5417,
+      &quot;w&quot;: 0.0928,
+      &quot;h&quot;: 0.0398
+    }
+  },
+  &quot;feeders&quot;: [],
+  &quot;conveyor&quot;: {
+    &quot;slowRowsPerSec&quot;: 7.5,
+    &quot;fastMultiplier&quot;: 2,
+    &quot;speedUpDelayAfterTutorial&quot;: 0.6,
+    &quot;speedUpRamp&quot;: 0.45
+  },
+  &quot;box&quot;: {
+    &quot;capacityRows&quot;: 10,
+    &quot;flyToShelf&quot;: 0.2,
+    &quot;armDelay&quot;: 0.2,
+    &quot;beadFlight&quot;: 0.25,
+    &quot;fullGlow&quot;: 0.3,
+    &quot;slotFreeAfterFull&quot;: 0.3,
+    &quot;flyAway&quot;: 0.6,
+    &quot;goneAfterFull&quot;: 0.9,
+    &quot;percentStep&quot;: 5
+  },
+  &quot;shelf&quot;: {
+    &quot;slots&quot;: [
+      {
+        &quot;x&quot;: 0.1709,
+        &quot;y&quot;: 0.613,
+        &quot;w&quot;: 0.154,
+        &quot;h&quot;: 0.0565
+      },
+      {
+        &quot;x&quot;: 0.3418,
+        &quot;y&quot;: 0.613,
+        &quot;w&quot;: 0.154,
+        &quot;h&quot;: 0.0565
+      },
+      {
+        &quot;x&quot;: 0.5084,
+        &quot;y&quot;: 0.613,
+        &quot;w&quot;: 0.154,
+        &quot;h&quot;: 0.0565
+      },
+      {
+        &quot;x&quot;: 0.6793,
+        &quot;y&quot;: 0.613,
+        &quot;w&quot;: 0.154,
+        &quot;h&quot;: 0.0565
+      }
+    ]
+  },
+  &quot;tray&quot;: {
+    &quot;plate&quot;: [
+      {
+        &quot;x&quot;: 0,
+        &quot;y&quot;: 0.7037,
+        &quot;w&quot;: 1,
+        &quot;h&quot;: 0.25
+      }
+    ],
+    &quot;cutout&quot;: [
+      {
+        &quot;x&quot;: 0.0669,
+        &quot;y&quot;: 0.7037,
+        &quot;w&quot;: 0.8662,
+        &quot;h&quot;: 0.0953
+      },
+      {
+        &quot;x&quot;: 0.1389,
+        &quot;y&quot;: 0.799,
+        &quot;w&quot;: 0.7222,
+        &quot;h&quot;: 0.0834
+      }
+    ],
+    &quot;boxes&quot;: [
+      {
+        &quot;id&quot;: &quot;box-yellow-1&quot;,
+        &quot;colour&quot;: &quot;yellow&quot;,
+        &quot;cell&quot;: &quot;r1c1&quot;,
+        &quot;rect&quot;: {
+          &quot;x&quot;: 0.1329,
+          &quot;y&quot;: 0.7083,
+          &quot;w&quot;: 0.1582,
+          &quot;h&quot;: 0.0648
+        },
+        &quot;locked&quot;: false,
+        &quot;key&quot;: false
+      },
+      {
+        &quot;id&quot;: &quot;box-yellow-2&quot;,
+        &quot;colour&quot;: &quot;yellow&quot;,
+        &quot;cell&quot;: &quot;r1c2&quot;,
+        &quot;rect&quot;: {
+          &quot;x&quot;: 0.3249,
+          &quot;y&quot;: 0.7083,
+          &quot;w&quot;: 0.1582,
+          &quot;h&quot;: 0.0648
+        },
+        &quot;locked&quot;: false,
+        &quot;key&quot;: false
+      },
+      {
+        &quot;id&quot;: &quot;box-green-1&quot;,
+        &quot;colour&quot;: &quot;green&quot;,
+        &quot;cell&quot;: &quot;r1c3&quot;,
+        &quot;rect&quot;: {
+          &quot;x&quot;: 0.5169,
+          &quot;y&quot;: 0.7083,
+          &quot;w&quot;: 0.1582,
+          &quot;h&quot;: 0.0648
+        },
+        &quot;locked&quot;: false,
+        &quot;key&quot;: false
+      },
+      {
+        &quot;id&quot;: &quot;box-yellow-3&quot;,
+        &quot;colour&quot;: &quot;yellow&quot;,
+        &quot;cell&quot;: &quot;r1c4&quot;,
+        &quot;rect&quot;: {
+          &quot;x&quot;: 0.7089,
+          &quot;y&quot;: 0.7083,
+          &quot;w&quot;: 0.1582,
+          &quot;h&quot;: 0.0648
+        },
+        &quot;locked&quot;: false,
+        &quot;key&quot;: false
+      },
+      {
+        &quot;id&quot;: &quot;box-green-2&quot;,
+        &quot;colour&quot;: &quot;green&quot;,
+        &quot;cell&quot;: &quot;r2c1&quot;,
+        &quot;rect&quot;: {
+          &quot;x&quot;: 0.2289,
+          &quot;y&quot;: 0.8009,
+          &quot;w&quot;: 0.1582,
+          &quot;h&quot;: 0.0648
+        },
+        &quot;locked&quot;: false,
+        &quot;key&quot;: false
+      },
+      {
+        &quot;id&quot;: &quot;box-red-1&quot;,
+        &quot;colour&quot;: &quot;red&quot;,
+        &quot;cell&quot;: &quot;r2c2&quot;,
+        &quot;rect&quot;: {
+          &quot;x&quot;: 0.4209,
+          &quot;y&quot;: 0.8009,
+          &quot;w&quot;: 0.1582,
+          &quot;h&quot;: 0.0648
+        },
+        &quot;locked&quot;: false,
+        &quot;key&quot;: false
+      },
+      {
+        &quot;id&quot;: &quot;box-blue-1&quot;,
+        &quot;colour&quot;: &quot;blue&quot;,
+        &quot;cell&quot;: &quot;r2c3&quot;,
+        &quot;rect&quot;: {
+          &quot;x&quot;: 0.6129,
+          &quot;y&quot;: 0.8009,
+          &quot;w&quot;: 0.1582,
+          &quot;h&quot;: 0.0648
+        },
+        &quot;locked&quot;: false,
+        &quot;key&quot;: false
+      }
+    ]
+  },
+  &quot;lock&quot;: null,
+  &quot;tutorial&quot;: {
+    &quot;caption&quot;: &quot;&quot;,
+    &quot;captionRect&quot;: {
+      &quot;x&quot;: 0.1266,
+      &quot;y&quot;: 0.463,
+      &quot;w&quot;: 0.7468,
+      &quot;h&quot;: 0.0787
+    },
+    &quot;captionUntilStep&quot;: 0,
+    &quot;steps&quot;: [],
+    &quot;handTapPeriod&quot;: 0.5,
+    &quot;hint&quot;: &quot;&quot;
+  },
+  &quot;hud&quot;: {
+    &quot;levelPill&quot;: {
+      &quot;x&quot;: 0.3966,
+      &quot;y&quot;: 0.0602,
+      &quot;w&quot;: 0.211,
+      &quot;h&quot;: 0.0398
+    },
+    &quot;coinPill&quot;: {
+      &quot;x&quot;: 0.7722,
+      &quot;y&quot;: 0.0602,
+      &quot;w&quot;: 0.2278,
+      &quot;h&quot;: 0.0444
+    },
+    &quot;gear&quot;: {
+      &quot;x&quot;: 0.0464,
+      &quot;y&quot;: 0.0602,
+      &quot;w&quot;: 0.0928,
+      &quot;h&quot;: 0.0398
+    },
+    &quot;coins&quot;: 500,
+    &quot;boosters&quot;: [
+      {
+        &quot;x&quot;: 0.2743,
+        &quot;locked&quot;: true,
+        &quot;label&quot;: &quot;Level 6&quot;
+      },
+      {
+        &quot;x&quot;: 0.5173,
+        &quot;locked&quot;: true,
+        &quot;label&quot;: &quot;Level 8&quot;
+      },
+      {
+        &quot;x&quot;: 0.7512,
+        &quot;locked&quot;: true,
+        &quot;label&quot;: &quot;Level 11&quot;
+      }
+    ],
+    &quot;boosterY&quot;: 0.94
+  },
+  &quot;result&quot;: {
+    &quot;title&quot;: &quot;Congrats&quot;,
+    &quot;nextReward&quot;: 25,
+    &quot;newFeatureFrom&quot;: 0,
+    &quot;newFeatureTo&quot;: 0,
+    &quot;adButton&quot;: null,
+    &quot;awesomeBanner&quot;: false,
+    &quot;confettiFromCompletion&quot;: 2,
+    &quot;celebrationSparkle&quot;: 1.1,
+    &quot;dimAt&quot;: 1.2,
+    &quot;titleAt&quot;: 1.3,
+    &quot;buttonAt&quot;: 1.8,
+    &quot;nextRect&quot;: {
+      &quot;x&quot;: 0.3165,
+      &quot;y&quot;: 0.6157,
+      &quot;w&quot;: 0.3692,
+      &quot;h&quot;: 0.0509
+    }
+  },
+  &quot;evidence&quot;: {
+    &quot;originTimestamp&quot;: 0,
+    &quot;durationMs&quot;: 0,
+    &quot;generated&quot;: true
+  },
+  &quot;track&quot;: &quot;tall&quot;,
+  &quot;provenance&quot;: {
+    &quot;chapter&quot;: &quot;Tap and fill&quot;,
+    &quot;formation&quot;: &quot;tall|4-3|open|f0&quot;,
+    &quot;relief&quot;: false,
+    &quot;seed&quot;: 1756478264
+  },
+  &quot;index&quot;: 4,
+  &quot;witness&quot;: &quot;0:box-yellow-1;1:box-yellow-2;2:box-green-1;3:box-yellow-3;183:box-green-2;265:box-red-1;498:box-blue-1&quot;
+}</pre><h3>Level fields</h3><table><tr><th>Field</th><th>JSON type</th></tr><tr><td>levelId</td><td>str</td></tr><tr><td>levelNumber</td><td>int</td></tr><tr><td>title</td><td>str</td></tr><tr><td>column</td><td>dict</td></tr><tr><td>palette</td><td>dict</td></tr><tr><td>ring</td><td>dict</td></tr><tr><td>feeders</td><td>list</td></tr><tr><td>conveyor</td><td>dict</td></tr><tr><td>box</td><td>dict</td></tr><tr><td>shelf</td><td>dict</td></tr><tr><td>tray</td><td>dict</td></tr><tr><td>lock</td><td>NoneType</td></tr><tr><td>tutorial</td><td>dict</td></tr><tr><td>hud</td><td>dict</td></tr><tr><td>result</td><td>dict</td></tr><tr><td>evidence</td><td>dict</td></tr><tr><td>track</td><td>str</td></tr><tr><td>provenance</td><td>dict</td></tr><tr><td>index</td><td>int</td></tr><tr><td>witness</td><td>str</td></tr></table><h3>Safe worked editing procedure</h3><ol><li>Open Level 4 in the Level Editor and duplicate it into an unused slot.</li><li>Use the editor’s supported controls for a small placement change; keep legal occupancy and required targets. Do not invent JSON fields.</li><li>Run the shipped validator, correct any rule errors, save, then open the duplicate in gameplay and complete it.</li><li>For generation, record the current seed, request a small append batch using the exposed controls, validate its solutions and confirm the previous campaign prefix is unchanged. Cancelling must leave the campaign unchanged.</li></ol><p>Run these procedures in a clean import of the final candidate before claiming buyer acceptance; restore test additions afterward.</p><h3>Current booster policy</h3><pre>{
+  &quot;schemaVersion&quot;: 1,
+  &quot;gameId&quot;: &quot;beads-out&quot;,
+  &quot;defaultProfileId&quot;: &quot;default&quot;,
+  &quot;initialGrant&quot;: 2,
+  &quot;refillAmount&quot;: 1,
+  &quot;baseCoinCost&quot;: 100,
+  &quot;coinCostStep&quot;: 25,
+  &quot;levelsPerPriceStep&quot;: 10,
+  &quot;rewardedTimeoutSeconds&quot;: 90,
+  &quot;boosters&quot;: [
+    {
+      &quot;id&quot;: &quot;beads_extra_slot&quot;,
+      &quot;unlockLevel&quot;: 2,
+      &quot;rewardedPlacementId&quot;: &quot;booster_refill_beads_extra_slot&quot;,
+      &quot;reason&quot;: &quot;Module 04 default first unlock (level 2). Simplest idea: one more shelf slot while boxes wait for their colour; useful on every board.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;beads_move_any&quot;,
+      &quot;unlockLevel&quot;: 7,
+      &quot;rewardedPlacementId&quot;: &quot;booster_refill_beads_move_any&quot;,
+      &quot;reason&quot;: &quot;Module 04 default second unlock (level 7), just before side feeders (level 8): sends any box to the shelf, useful once colours arrive from the arms.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;beads_fill&quot;,
+      &quot;unlockLevel&quot;: 12,
+      &quot;rewardedPlacementId&quot;: &quot;booster_refill_beads_fill&quot;,
+      &quot;reason&quot;: &quot;Module 04 default third unlock (level 12): fills a box directly, most valuable after feeder-only colours start (level 9+). Teaching order kept from the recorded badges (extra slot, move any, fill = 6/8/11).&quot;
+    }
+  ]
+}</pre><p>Hosting, native-device tests and live-service verification are separately recorded in the delivery handoff. A local build is not proof of a hosted release.</p></section><section id="default-font-policy"><h2>Fonts</h2><p>Unity-provided defaults only: TextMesh Pro default font for TMP text and LegacyRuntime.ttf for legacy Unity UI. Official TMP Essentials must be installed. Do not add custom font files or atlases. Any historical custom-font references above describe an older revision; they are not current dependencies.</p></section><section id="publishing-2026-10-09"><h2>Demo and publishing configuration</h2><p>Current source verified on 2026-10-09. The Android download is a development demo with debug signing; WebGL is a LocalQA showcase. Ads are included as LiveOps provider adapters and test/local configuration; vendor SDKs and production credentials are not bundled in the buyer package. Native device and live store certification remain pending.</p><p>For product help, contact SatisVizion at satisvizion@gmail.com</p><p>See Third-Party Notices.txt in the package for the verified dependency and license inventory.</p><p><a href="https://satisvizion.github.io/Documentations/beads-out/HyperCasualLiveOpsKit.html">HyperCasual LiveOps Kit manual</a></p></section></main></body></html>
