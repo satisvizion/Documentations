@@ -1,0 +1,113 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Goods Sorting — Buyer Guide</title><style>body{margin:0;background:#1f1710;color:#f3ecdf;font:16px/1.65 system-ui,sans-serif}header,main,nav{max-width:1040px;margin:auto;padding:24px}header{padding-bottom:0}h1{font-size:38px}h2{color:#e9c46a}nav{display:flex;flex-wrap:wrap;gap:10px 24px;border-bottom:1px solid #5a4630}a{color:#f4d58d}section{padding:12px 0 24px;scroll-margin-top:20px}code,pre{background:#33261a;border-radius:6px}code{padding:2px 5px}pre{padding:16px;white-space:pre-wrap;overflow-wrap:anywhere}aside{border-left:4px solid #e9c46a;padding:14px;background:#2f2418}table{border-collapse:collapse;width:100%}td,th{text-align:left;border-bottom:1px solid #5a4630;padding:10px}@media(max-width:600px){header,main,nav{padding:16px}h1{font-size:30px}}</style></head><body><header><h1>Goods Sorting — Buyer Guide</h1><p>Unity 6000.0.62f1 · Universal Render Pipeline · LocalQA handoff candidate</p><aside>Desktop gameplay, the level tools and local Windows/Android builds have been exercised. Native-device acceptance, live ad/billing providers, artwork provenance (the goods, wood and chain textures are the owner&#39;s originals; the six booster icons and tutorial illustrations are AI-generated game-specific art &mdash; see AI-DISCLOSURE.txt), an audible listening review and owner-confirmed asset provenance remain open. This is not a production release certification.</aside></header><nav><a href="#overview">Overview</a><a href="#getting-started">Getting Started</a><a href="#folders">Folder Structure</a><a href="#gameplay">Gameplay</a><a href="#scripts">Scripts Reference</a><a href="#editor">Level Editor</a><a href="#generator">Automatic Level Generator</a><a href="#boosters">Boosters</a><a href="#variation">Level Variation</a><a href="#customization">Customization Guide</a><a href="#format">Level Format</a><a href="#support">Support</a><a href="#legal">Licences and Notices</a><a href="#final-current-handoff">Current delivery</a><a href="#default-font-policy">Fonts</a></nav><main>
+<section id="overview"><h2>Overview</h2><p>Goods Sorting is a portrait drag-to-match shelf puzzle with 500 levels. Goods sit in three-slot boxes stacked in two to four columns; only the first rows of each column are on the shelf, the rest queue behind it. Drag a good into a free slot of another open box. Three matching goods clear a box, an emptied box also leaves the shelf, and the next queued box slides in. Chained boxes open after enough boxes have left. Clear every box to win; when no open box on the shelf has a free slot, the level is lost. The owner's original hand-made 3&nbsp;×&nbsp;17 shelf ships as level 500.</p></section>
+<section id="getting-started"><h2>Getting Started</h2><ol><li>Create or open a Unity 6000.0.62f1 project that uses the Universal Render Pipeline, the Input System package (<code>activeInputHandler</code> = Input System or Both) and Unity UI. Import TextMesh Pro Essential Resources when prompted.</li><li>Import this package. Two roots appear: <code>Assets/_GoodsSorting</code> (game, engine scene, tools, resources) and <code>Assets/HyperCasualLiveOpsKit</code> (menu, economy, LiveOps, boosters).</li><li>Assign a URP pipeline asset in Graphics/Quality settings and set <em>Player → Color Space</em> to <strong>Linear</strong> (the game was authored and tested in Linear; Gamma renders the shelf noticeably brighter). <code>Assets/_GoodsSorting/ProjectRenderSettings</code> contains the tested PC/Mobile pipeline and renderer assets.</li><li>Add <code>Assets/HyperCasualLiveOpsKit/StarterMenu/Scenes/HLK_MainMenu.unity</code> first and <code>Assets/_GoodsSorting/Scenes/Campaign.unity</code> second to Build Settings. Play from the menu; the results overlay drives next level, replay and menu.</li><li>Open <strong>Tools → GoodsSorting → Documentation</strong> to reopen this guide inside the editor.</li></ol></section>
+<section id="folders"><h2>Folder Structure</h2><table><tr><th>Path</th><th>Contents</th></tr><tr><td><code>_GoodsSorting/Game</code></td><td>Original shelf game: <code>Scripts</code> (rules, input, boosters), <code>Prefabs</code> (Box, FillBox, Item, completion texts), <code>Datas</code> (goods sprite mapping, the authored level asset), <code>Textures</code>, <code>Materials</code>.</td></tr><tr><td><code>_GoodsSorting/Engine</code></td><td>Hypercasual Game Engine core used by the shelf scene (camera switcher, lose/win panel prefab).</td></tr><tr><td><code>_GoodsSorting/Scenes/Campaign.unity</code></td><td>The playable campaign scene: shelf, input, campaign bootstrap, camera fit and the authored kit gameplay overlay.</td></tr><tr><td><code>_GoodsSorting/Integration</code></td><td>Kit bridge (settlement, analytics), booster adapter, campaign model/solver, runtime loader, camera fit and booster definitions (<code>PowerUps</code>).</td></tr><tr><td><code>_GoodsSorting/Resources/Levels</code></td><td><code>Level_1.json … Level_500.json</code> plus <code>CampaignAuthoring.json</code> (editor ownership metadata). Loaded by <code>Resources.Load("Levels/Level_N")</code>.</td></tr><tr><td><code>_GoodsSorting/LevelTools</code></td><td>Game adapter, spatial editor, existing-level assessment, progression rules and the shipped campaign baseline (<code>Data</code>).</td></tr><tr><td><code>_GoodsSorting/ProductionLevelTools</code></td><td>Shared level-tool framework: editor window, document/undo, seeded generation, staged publication.</td></tr><tr><td><code>HyperCasualLiveOpsKit</code></td><td>Menu, economy, ads/IAP simulation, quests, battle pass, minigames, boosters, audio bank. See its own Documentation folder.</td></tr></table></section>
+<section id="gameplay"><h2>Gameplay</h2><ul><li><strong>Move:</strong> press a good in an open, unchained box on the shelf and release it over a free slot of another open box. Chained boxes accept nothing and release nothing.</li><li><strong>Complete:</strong> a box holding three identical goods pops with a completion text and leaves the shelf.</li><li><strong>Empty:</strong> a box whose last good is moved away also leaves the shelf — its three free slots go with it.</li><li><strong>Queue:</strong> when a box leaves, everything above it in that column slides down and the next queued box appears.</li><li><strong>Chains:</strong> a chained box shows a number; every box that leaves the shelf counts every visible chain down by one. At zero the box opens.</li><li><strong>Loss:</strong> no free slot on any open box. A 1.5-second grace lets a booster rescue the shelf before the lose overlay.</li><li><strong>Win:</strong> no boxes left anywhere; the kit credits 50 coins once and shows the results overlay.</li></ul></section>
+<section id="scripts"><h2>Scripts Reference</h2><table><tr><th>Script</th><th>Role</th></tr><tr><td><code>GameLevel</code> / <code>GameLevel.Boosters</code></td><td>Builds the shelf from a <code>LevelData</code>, applies moves (<code>TryMove</code>), completion/empty/chain rules, jam grace, events (<code>OutcomeReached</code>, <code>MoveAttempted</code>, <code>BoxRemoved</code>) and the three booster effects.</td></tr><tr><td><code>InputManager</code></td><td>Mouse/touch drag; <code>PointerBlocked</code> gate for overlays; <code>TapInterceptor</code> for armed boosters.</td></tr><tr><td><code>Box</code>, <code>FillBox</code>, <code>Item</code>, <code>ChainFeature</code></td><td>Scene entities: a box with three slots, a slot, a draggable good, the chain visual/counter.</td></tr><tr><td><code>LevelData</code>, <code>ItemData</code></td><td>Authored level ScriptableObject (columns of boxes) and the goods-type → sprite mapping (37 types).</td></tr><tr><td><code>GoodsJsonLevel</code>, <code>ShelfState</code>, <code>GoodsShelfSolver</code></td><td>Runtime level contract, pure rules model and bounded solver/replay used by runtime, editor and generator.</td></tr><tr><td><code>GoodsSortingCampaign</code>, <code>GoodsSortingCampaignBootstrap</code></td><td>Load <code>Resources/Levels/Level_N.json</code>, convert to <code>LevelData</code>, select the level from the kit's selector and bind the level number.</td></tr><tr><td><code>GoodsSortingCameraFit</code></td><td>Fits the orthographic camera to the shelf between HUD and booster bar; refits on resolution, safe-area and tray changes.</td></tr><tr><td><code>GoodsSortingHlkBridge</code>, <code>GoodsSortingPowerUpAdapter</code></td><td>Kit settlement/analytics/audio cues and booster handler registration.</td></tr></table></section>
+<section id="editor"><h2>Level Editor</h2><p><strong>Tools → GoodsSorting → Level Editor</strong> opens the shared level window with the shelf canvas. The left list selects a level; Duplicate/Delete/Up/Down and Undo (Ctrl+Z) edit the campaign; <em>Validate + save</em> publishes runtime JSON through staging only when every level validates and its witness replays.</p><ul><li><strong>Paint goods:</strong> pick a good in the palette, left-click a slot to place it, right-click to clear. The <code>x</code> cell erases.</li><li><strong>Chains:</strong> in Chains mode click a box (left +1, right −1) or use Chain +/− on the selected box.</li><li><strong>Boxes / structure:</strong> Insert box, Remove box, Columns +/−, Visible rows +/−. The dimmed band above the shelf is the queue.</li><li><strong>Solve witness:</strong> edits clear the solution certificate; press <em>Solve witness</em> to let the bounded solver rebuild it (UNPROVEN means the search budget ran out, not that the level is impossible).</li><li><strong>Play saved level:</strong> launches the saved level in the Campaign scene.</li></ul></section>
+<section id="generator"><h2>Automatic Level Generator</h2><p><strong>Tools → GoodsSorting → Auto Level Generator</strong> opens the same window; the <em>Saved generation request</em> block holds count, seed, attempts per level, minimum formations, maximum repeat streak and append mode. <em>Generate into editor</em> builds the campaign in memory (deterministic for a seed), validates every level's solver witness, colour-normalised uniqueness and structural variety, then <em>Validate + save</em> publishes. Append keeps the existing prefix. The shipped <code>LevelTools/Data/CampaignBaseline.json</code> records the generated campaign so later manual edits can be told apart; <code>ExistingLevels.json</code> records how the owner's authored shelf was assessed and placed.</p></section>
+<section id="boosters"><h2>Boosters</h2><table><tr><th>Booster</th><th>Effect</th></tr><tr><td>SHUFFLE</td><td>Every good on the open shelf swaps places (queue and chained boxes untouched); new matches may settle.</td></tr><tr><td>UNLOCK</td><td>Arm it, then tap a pulsing chained box; its chain breaks at once.</td></tr><tr><td>EXTRA TRAY</td><td>Adds an empty tray beside the shelf for this attempt, up to three; rescues a shelf that just jammed.</td></tr></table><p>Definitions live in <code>_GoodsSorting/Integration/PowerUps</code>; counts, unlock levels, copy and art are edited there. Each booster has its own AI-generated centre icon and explainer illustration under <code>_GoodsSorting/Art/Boosters</code>; swap those six PNGs to re-skin the bar without touching effects. See AI-DISCLOSURE.txt for their origin.</p></section>
+<section id="variation"><h2>Level Variation</h2><p>Chapters change one lever at a time: level 1 is a single drag, the queue appears at level 5, chains at 16, four columns at 36, then more goods types (up to 12), deeper queues, tighter free slots and more chains, with recovery levels every tenth level after 20. Structure is the column count, per-column queue depth silhouette, visible rows and chain layout — 490+ distinct formations across the 500 levels and never the same formation three times in a row. The frozen progression rules are encoded in <code>GoodsProgression</code>.</p></section>
+<section id="customization"><h2>Customization Guide</h2><ul><li><strong>Goods art:</strong> replace the PNGs in <code>Game/Textures/Food</code> (keep file names/meta) or edit <code>ItemData.asset</code> mappings.</li><li><strong>Shelf art:</strong> Box prefab wood/chain textures in <code>Game/Textures</code>.</li><li><strong>Difficulty:</strong> change <code>GoodsProgression.Chapters</code> (types, triples, free slots, hidden boxes, chains) and regenerate with a new seed, or hand-edit levels in the editor.</li><li><strong>Boosters:</strong> counts/unlock levels in the PowerUp definition assets; effects in <code>GameLevel.Boosters.cs</code>.</li><li><strong>DEV shortcut panel:</strong> the orange <code>DEV</code> button is deliberately visible in every build so you can try Choose Level (all 500 levels), test win/lose, banner/ad triggers and booster unlock/refill/reset. Before shipping your own store build, delete <code>_GoodsSorting/Integration/GoodsSortingDevPanelPolicy.cs</code> (or set <code>StarterGameplayDevPanel.IsAvailable = false</code>) so the kit's release gate hides it again.</li><li><strong>Camera bands:</strong> <code>GoodsSortingCameraFit.topBand/bottomBand</code> reserve HUD and booster space.</li><li><strong>Economy/LiveOps:</strong> see the HyperCasualLiveOpsKit guide (rewards, ads, IAP, quests, pass, minigames).</li></ul></section>
+<section id="format"><h2>Level Format</h2><p>Each <code>Level_N.json</code> is a <code>GoodsJsonLevel</code>: <code>index</code>, <code>formation</code> key, <code>lesson</code>, <code>visibleRows</code>, <code>columns</code> (each a list of boxes with three <code>items</code>, 0 = empty, 1–37 = goods type, and a <code>chain</code> count) and the solver <code>witness</code> as flat triples <em>from-box, type, to-box</em> (box ids count column by column from the bottom of each queue).</p><pre>{
+  "index": 3,
+  "formation": "c2-v3-d2.1-k0",
+  "lesson": "Match goods; an emptied box leaves",
+  "visibleRows": 3,
+  "columns": [
+    { "boxes": [ { "items": [1, 2, 0], "chain": 0 }, { "items": [1, 1, 0], "chain": 0 } ] },
+    { "boxes": [ { "items": [2, 2, 0], "chain": 0 } ] }
+  ],
+  "witness": [0, 1, 1, 0, 2, 2]
+}</pre></section>
+<section id="support"><h2>Support</h2><p>Questions and bug reports: <a href="mailto:satisvizion@gmail.com">satisvizion@gmail.com</a>. Please include the Unity version, the level number and the editor console output.</p></section>
+<section id="legal"><h2>Licences and Notices</h2><!--LEGAL--></section>
+<section id="final-current-handoff"><h2>Current delivery and examples</h2><p>Unity 6000.0.62f1 / URP. Support: <a href="mailto:satisvizion@gmail.com">satisvizion@gmail.com</a>.</p><p>Buyer roots: Assets/_GoodsSorting, Assets/HyperCasualLiveOpsKit. Internal production, build and upload folders are excluded. The kit is an owner-approved first-party asset.</p><p>Current campaign: 500 levels. Use the shipped Level Editor and Auto Level Generator menu entries: Tools/GoodsSorting/Documentation, Tools/GoodsSorting/Level Editor, Tools/GoodsSorting/Auto Level Generator.</p><h3>Current complete level example</h3><p>Assets/_GoodsSorting/Resources/Levels/Level_4.json</p><pre>{
+  &quot;index&quot;: 4,
+  &quot;formation&quot;: &quot;c2-v2-d2.2-k0&quot;,
+  &quot;lesson&quot;: &quot;Boxes queue behind the shelf&quot;,
+  &quot;visibleRows&quot;: 2,
+  &quot;columns&quot;: [
+    {
+      &quot;boxes&quot;: [
+        {
+          &quot;items&quot;: [
+            1,
+            2,
+            0
+          ],
+          &quot;chain&quot;: 0
+        },
+        {
+          &quot;items&quot;: [
+            3,
+            3,
+            0
+          ],
+          &quot;chain&quot;: 0
+        }
+      ]
+    },
+    {
+      &quot;boxes&quot;: [
+        {
+          &quot;items&quot;: [
+            1,
+            1,
+            0
+          ],
+          &quot;chain&quot;: 0
+        },
+        {
+          &quot;items&quot;: [
+            2,
+            2,
+            3
+          ],
+          &quot;chain&quot;: 0
+        }
+      ]
+    }
+  ],
+  &quot;witness&quot;: [
+    0,
+    1,
+    2,
+    3,
+    3,
+    1,
+    0,
+    2,
+    3
+  ]
+}</pre><h3>Level fields</h3><table><tr><th>Field</th><th>JSON type</th></tr><tr><td>index</td><td>int</td></tr><tr><td>formation</td><td>str</td></tr><tr><td>lesson</td><td>str</td></tr><tr><td>visibleRows</td><td>int</td></tr><tr><td>columns</td><td>list</td></tr><tr><td>witness</td><td>list</td></tr></table><h3>Safe worked editing procedure</h3><ol><li>Open Level 4 in the Level Editor and duplicate it into an unused slot.</li><li>Use the editor’s supported controls for a small placement change; keep legal occupancy and required targets. Do not invent JSON fields.</li><li>Run the shipped validator, correct any rule errors, save, then open the duplicate in gameplay and complete it.</li><li>For generation, record the current seed, request a small append batch using the exposed controls, validate its solutions and confirm the previous campaign prefix is unchanged. Cancelling must leave the campaign unchanged.</li></ol><p>Run these procedures in a clean import of the final candidate before claiming buyer acceptance; restore test additions afterward.</p><h3>Current booster policy</h3><pre>{
+  &quot;schemaVersion&quot;: 1,
+  &quot;gameId&quot;: &quot;goodssort&quot;,
+  &quot;defaultProfileId&quot;: &quot;default&quot;,
+  &quot;initialGrant&quot;: 2,
+  &quot;refillAmount&quot;: 1,
+  &quot;baseCoinCost&quot;: 100,
+  &quot;coinCostStep&quot;: 25,
+  &quot;levelsPerPriceStep&quot;: 10,
+  &quot;rewardedTimeoutSeconds&quot;: 90,
+  &quot;boosters&quot;: [
+    {
+      &quot;id&quot;: &quot;goods_shuffle&quot;,
+      &quot;unlockLevel&quot;: 2,
+      &quot;rewardedPlacementId&quot;: &quot;goods_refill_shuffle&quot;,
+      &quot;reason&quot;: &quot;Phase04 default first slot. Untargeted and always legal, so it teaches &#x27;change the board&#x27; with no selection step.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;goods_extra_tray&quot;,
+      &quot;unlockLevel&quot;: 7,
+      &quot;rewardedPlacementId&quot;: &quot;goods_refill_extra_tray&quot;,
+      &quot;reason&quot;: &quot;Phase04 default second slot. Also untargeted and useful on any shelf, so it needs no mechanic prerequisite.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;goods_unlock&quot;,
+      &quot;unlockLevel&quot;: 16,
+      &quot;rewardedPlacementId&quot;: &quot;goods_refill_unlock&quot;,
+      &quot;reason&quot;: &quot;Justified deviation from the default third slot (12). UNLOCK can only target a chained box, and an independent scan of all 500 published levels finds ZERO chained boxes in levels 1-15, with the first at level 16. Introducing it earlier would give the player a booster with no legal target. Level 16 introduces chains, so its first use has a guaranteed opportunity. Round-001 finding GS-002; saved once rather than re-decided per run.&quot;
+    }
+  ]
+}</pre><p>Hosting, native-device tests and live-service verification are separately recorded in the delivery handoff. A local build is not proof of a hosted release.</p></section><section id="default-font-policy"><h2>Fonts</h2><p>Unity-provided defaults only: TextMesh Pro default font for TMP text and LegacyRuntime.ttf for legacy Unity UI. Official TMP Essentials must be installed. Do not add custom font files or atlases. Any historical custom-font references above describe an older revision; they are not current dependencies.</p></section><section id="publishing-2026-10-09"><h2>Demo and publishing configuration</h2><p>Current source verified on 2026-10-09. The Android download is a development demo with debug signing; WebGL is a LocalQA showcase. Ads are included as LiveOps provider adapters and test/local configuration; vendor SDKs and production credentials are not bundled in the buyer package. Native device and live store certification remain pending.</p><p>For product help, contact SatisVizion at satisvizion@gmail.com</p><p>See Third-Party Notices.txt in the package for the verified dependency and license inventory.</p><p><a href="https://satisvizion.github.io/Documentations/goods-sorting/HyperCasualLiveOpsKit.html">HyperCasual LiveOps Kit manual</a></p></section></main></body></html>
