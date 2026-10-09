@@ -1,0 +1,790 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sand Blocks: Drop Puzzle — Buyer Guide</title><style>body{margin:0;background:#1b1830;color:#efedf9;font:16px/1.65 system-ui,sans-serif}header,main,nav{max-width:1040px;margin:auto;padding:24px}header{padding-bottom:0}h1{font-size:38px}h2{color:#c9a6ff}nav{display:flex;flex-wrap:wrap;gap:10px 24px;border-bottom:1px solid #3d3766}a{color:#d8c2ff}section{padding:12px 0 24px;scroll-margin-top:20px}code,pre{background:#272246;border-radius:6px}code{padding:2px 5px}pre{padding:16px;white-space:pre-wrap;overflow-wrap:anywhere}aside{border-left:4px solid #c9a6ff;padding:14px;background:#241f40}table{border-collapse:collapse;width:100%}td,th{text-align:left;border-bottom:1px solid #3d3766;padding:10px;vertical-align:top}@media(max-width:600px){header,main,nav{padding:16px}h1{font-size:30px}}
+/* Publishing review: readable narrow-width tables and paths. */
+main{min-width:0}table{width:100%;table-layout:fixed}td,th,code,a{overflow-wrap:anywhere}pre{max-width:100%;overflow:auto}
+</style></head><body><header><h1>Sand Blocks: Drop Puzzle — Buyer Guide</h1><p>Unity 6000.0.62f1 · Universal Render Pipeline · LocalQA handoff candidate</p><aside>Desktop gameplay, the level tools and local Windows/Android builds have been exercised. Native-device acceptance, live ad/billing providers, original sound authorship review, human difficulty balancing and owner-confirmed asset provenance remain open. This is not a production release certification.</aside></header><nav><a href="#overview">Overview</a><a href="#getting-started">Getting Started</a><a href="#folders">Folder Structure</a><a href="#gameplay">Gameplay</a><a href="#scripts">Scripts Reference</a><a href="#editor">Level Editor</a><a href="#generator">Automatic Level Generator</a><a href="#boosters">Boosters</a><a href="#variation">Level Variation</a><a href="#customization">Customization Guide</a><a href="#format">Level Format</a><a href="#support">Support</a><a href="#legal">Licences and Notices</a><a href="#final-current-handoff">Current delivery</a><a href="#default-font-policy">Fonts</a></nav><main>
+<section id="overview"><h2>Overview</h2><p>Sand Blocks is a portrait drag puzzle with 500 levels. Glass tanks at the top of the board hold coloured sand in layers; every tank column pours its bottom layer straight down into the box that rests under it. Drag the open boxes on the board (they slide through free cells only) under a column whose bottom sand matches their colour: the sand pours in, the full box pops and frees its cells. Fill every box before the countdown reaches 00:00 to win; at 00:00 the level is lost. Level 1 is a guided tutorial with the shared tutorial hand.</p><p>Mechanics introduced over the campaign: layered tank columns (level 5), numbered covers that open after that many boxes have been filled (level 10), boxes hidden under closed covers (level 15), key boxes that open the padlocked box (level 40) and pipe-fed tanks (level 60), on nine board families (twin tanks, corridors, steps, pillars, channels, covered boards, towers, pockets and vaults). Every 50th level is a SUPER HARD level. Levels 1 and 200 are the two recorded boards of the original game.</p><p>The HyperCasualLiveOpsKit (separate root <code>Assets/HyperCasualLiveOpsKit</code>, with its own guide) supplies the menu, level selection, capsule HUD, results, wallet, quests, pass, minigames, shop (LocalQA dummy store), ads (LocalQA mock) and the booster bar with refills.</p></section>
+<section id="getting-started"><h2>Getting Started</h2><ol><li>Create a Unity 6000.0.62f1 project with the Universal Render Pipeline, the Input System (set <i>Active Input Handling</i> to <i>Both</i> or <i>Input System</i>) and uGUI; import TextMesh Pro Essential Resources when Unity asks.</li><li>Import the package. Assign <code>Assets/Game/ProjectRenderSettings/PC_RPAsset.asset</code> (or <code>Mobile_RPAsset.asset</code>) in Graphics and Quality settings and use the Linear colour space.</li><li>Add <code>Assets/HyperCasualLiveOpsKit/StarterMenu/Scenes/HLK_MainMenu.unity</code> (first) and <code>Assets/Game/Scenes/Game.unity</code> to the build settings and press Play in the menu scene. Choose a level or press PLAY NEXT LEVEL.</li><li>Open <b>Tools → Sand Blocks → Level Editor</b> or <b>Auto Level Generator</b> to inspect and change the campaign, and <b>Tools → Sand Blocks → Documentation</b> for this guide.</li></ol></section>
+<section id="folders"><h2>Folder Structure</h2><table><tr><th>Folder</th><th>Contents</th></tr><tr><td><code>Game/Scripts/Core</code></td><td>Pure C# rules: <code>LevelData</code> (the level JSON contract), <code>Sim</code> (fixed 60 Hz simulation of dragging, pouring, completion, covers, keys/padlock, countdown), <code>SimBoosters</code> (freeze, hammer, UFO), <code>Contract</code> (recorded-level contracts).</td></tr><tr><td><code>Game/Scripts/Core/Campaign</code></td><td>The generator: <code>CampaignPlan</code> (introductions, family schedule, per-level request), <code>Families</code> (board layouts), <code>LevelBuilder</code> (forward construction with a witness), <code>CampaignGenerator</code>, <code>Witness</code> (<code>WitnessMove</code>, <code>WitnessReplay</code>), <code>Solver</code> (independent policy), <code>Footprints</code>, <code>LevelJson</code>.</td></tr><tr><td><code>Game/Scripts/Game</code></td><td>Presentation: <code>GameController</code> (input, level start, host hooks), <code>Viewport</code> (camera and host framing), <code>WorldView</code>, <code>BoardView</code>, <code>PieceView</code>, <code>SandStreamView</code>, <code>FxView</code>, <code>BoosterView</code>, <code>AudioView</code>, <code>Session</code> (level catalogue).</td></tr><tr><td><code>Game/Scripts/UI</code></td><td>The game's own HUD (countdown plate, SUPER HARD banner and the standalone menu/result screens).</td></tr><tr><td><code>Game/Scripts/Models</code></td><td>The model registry and procedural/native model variants used by the board and boxes.</td></tr><tr><td><code>Game/Integration</code></td><td>The link to the kit: <code>SandBlocksHlkBridge</code> (level selection, pointer/modal gating, one settlement per attempt, results, analytics, play area), <code>SandBlocksPowerUpAdapter</code> (freeze/hammer/UFO on the kit bar), <code>SandBlocksBoosterProgression</code>, <code>SandBlocksPointerDriver</code>, booster definitions in <code>PowerUps</code>.</td></tr><tr><td><code>Game/LevelTools</code>, <code>Game/ProductionLevelTools</code></td><td>Editor-only level editor and generator (Sand Blocks adapter on the shared level-tools framework) and its baseline data.</td></tr><tr><td><code>Game/Resources/Levels</code></td><td>The playable campaign <code>Level_1.json … Level_500.json</code> and <code>CampaignAuthoring.json</code> (authoring data, never counted as a level).</td></tr><tr><td><code>Game/Resources/LevelSources</code></td><td>The two recorded boards <code>level-1.json</code> and <code>level-200.json</code> as originally authored.</td></tr><tr><td><code>Game/Resources</code> (other)</td><td>Native and generated models, materials, shaders, images, audio, Unity-provided default fonts and the booster progression policy (<code>HLK/BoosterProgression.json</code>).</td></tr><tr><td><code>Game/Scenes</code>, <code>Game/ProjectRenderSettings</code></td><td>The gameplay scene and the URP assets.</td></tr></table></section>
+<section id="gameplay"><h2>Gameplay</h2><p><b>Moving.</b> Press a visible box and drag: it follows the finger through free cells (it collides with other boxes, walls, closed covers and the board edge) and snaps to the nearest cell on release. One box is held at a time. A box under a closed cover cannot be picked up; a press on it counts as a blocked attempt.</p><p><b>Pouring.</b> Each tank column pours its bottom sand layer into the box on its dock cell (the cell below the column; the outermost columns also feed the cell beside the tank's bottom row). The colour must match. A box fills at the level's <code>fillPctPerSec</code>, split over the columns feeding it, and the sand leaves those columns' queues; when a layer runs out the next colour above it reaches the bottom.</p><p><b>Covers, keys, padlock.</b> A cover shows a number: every filled box lowers it by one; at zero the cover rolls away and the boxes under it can be moved. Filling a key box sends its key to the padlocked box; when all keys have arrived, the padlock opens and that box can receive sand.</p><p><b>Outcome.</b> Filling every box wins (the kit results credit the win reward once, default 50 coins). The countdown (90–240 s per level) reaching 00:00 loses; the lose card offers TRY AGAIN. Every campaign level has a stored solution (witness) that wins in the simulation with at least 61 s to spare.</p></section>
+<section id="scripts"><h2>Scripts Reference</h2><table><tr><th>Type</th><th>Role</th></tr><tr><td><code>SandBlocks.Core.LevelData</code></td><td>Parses the level JSON (<code>FromJson</code>, <code>Validate</code>); <code>LevelJson.ToJson</code> writes it.</td></tr><tr><td><code>SandBlocks.Core.Sim</code></td><td>Deterministic simulation: <code>PointerDown/Move/Up</code>, <code>Step</code>, <code>Legal</code>, <code>Hidden</code>, events (<code>grab</code>, <code>drop</code>, <code>complete</code>, <code>unlock</code>, <code>cover-open</code>, <code>won</code>, <code>lost</code>) and booster effects (<code>UseBooster</code>, <code>CanTarget</code>).</td></tr><tr><td><code>SandBlocks.Core.WitnessMove</code>, <code>WitnessReplay</code>, <code>Solver</code></td><td>The stored solution (a list of box drags with their cell paths), its proof through the Sim (<code>Play</code>) and an independent search policy (<code>Solve</code>).</td></tr><tr><td><code>SandBlocks.Core.CampaignGenerator</code>, <code>CampaignPlan</code></td><td>The saved progression plan (introductions, family schedule, recovery and SUPER HARD levels) and <code>Generate(index, family, seed, …)</code>; every slot is reproducible on its own.</td></tr><tr><td><code>SandBlocks.Game.GameController</code></td><td>Starts levels (<code>StartLevel</code>, <code>Restart</code>), turns pointer input into Sim input, exposes <code>LevelStarted</code>, <code>OnSimEvent</code>, <code>PressRefused</code> and the host hooks.</td></tr><tr><td><code>SandBlocks.Game.Viewport</code></td><td>Camera. Under the kit the board is fitted full-window into <code>HostPlayArea</code> (<code>SolveHost</code>, <code>FrameHost</code>).</td></tr><tr><td><code>SandBlocks.Integration.SandBlocksHlkBridge</code></td><td>Kit link: selected level, one settlement per attempt, results, <code>sandblocks_level_end</code> analytics (level, won, coins, moves, fills, blocked, seconds), <code>PlayArea()</code>.</td></tr></table></section>
+<section id="editor"><h2>Level Editor</h2><p><b>Tools → Sand Blocks → Level Editor</b> lists the campaign on the left (duplicate, delete, move up/down, Undo). The canvas draws the board as the game lays it out: tanks with their sand layers (the bottom layer pours first), dock marks under each tank column, board cells, walls, numbered covers and every box in its colour and footprint with key/padlock marks.</p><ul><li><b>Box</b>: pick a footprint (1x1, 1x2, 1x3, 1x4, 2x2, L3, L4), a quarter turn, mirror and colour, then click a free cell; click a box to remove it.</li><li><b>Cell</b> adds/removes board cells (notches, bays), <b>Wall</b> toggles a wall on an empty board cell, <b>Cover</b> adds/removes a cell of the selected cover and sets its count, <b>Key/Lock</b> cycles a box through key → padlocked → plain.</li><li><b>Rebuild sand + witness</b> re-derives the tank layers and a witness for the edited board with the generator's construction (proven on the Sim; try another seed when it fails); <b>Solve</b> searches a witness for the current data with the policy solver; <b>Check</b> validates and replays it.</li></ul><p>Every edit clears the level's stored witness. Saving refuses levels without a proven witness, invalid layouts and duplicate puzzles, and leaves the published JSON unchanged on failure. <b>Play saved level</b> opens it in the game scene.</p></section>
+<section id="generator"><h2>Automatic Level Generator</h2><p><b>Tools → Sand Blocks → Auto Level Generator</b> (same window) saves the generation request (final count, seed, attempts, minimum formations, repeat streak, append) and generates into the editor for review before saving. Generation is deterministic per seed and slot: each board is built forward from its solution — the generator lays out the family's tanks and board, places the boxes, then plays the planned delivery order to derive which sand each column holds, so every board is solvable by construction and its witness is replayed on the Sim. Slots 1 and 200 keep the recorded boards. Append mode keeps the existing levels and adds new ones after them; cancelling leaves the campaign unchanged. A 500-level run takes about three minutes in the editor.</p></section>
+<section id="boosters"><h2>Boosters</h2><table><tr><th>Booster</th><th>Unlock</th><th>Effect</th></tr><tr><td>Freeze</td><td>Level 2</td><td>Stops the countdown for 10 s.</td></tr><tr><td>Hammer</td><td>Level 7</td><td>Tap a visible box: it fills at once; its sand is taken from the tanks.</td></tr><tr><td>UFO</td><td>Level 12</td><td>Tap a visible box: every box of that colour fills and that colour's sand leaves the tanks.</td></tr></table><p>Each unlock grants two free charges once. Refills cost <code>100 + 25 × floor((highest level − 1) / 10)</code> coins or a rewarded ad (LocalQA mock). The policy is <code>Game/Resources/HLK/BoosterProgression.json</code>. The first use shows the booster explanation; a targeted booster then guides its first tap with the shared tutorial hand on a valid box. Taps on covered boxes are not targets and cost nothing.</p></section>
+<section id="variation"><h2>Level Variation</h2><p>Families: twin tanks (from level 2), corridor (3), step (5), pillar (7), channels (10), covered boards (15), towers (20), pocket (25) and vault (40). The opening 2–40 introduces one idea at a time; afterwards a seeded schedule never shows a family three times running. Boxes grow from 2–6 per board in levels 1–10 to about 12 on average late in the campaign (up to 28), colours from 2 to 9. Levels ending in 8 (from 28) are lighter recovery boards; every 50th level is SUPER HARD. A rectangle-silhouette rule shapes every third board (narrow tanks, notched corners, comb walls). The current campaign has 320 distinct geometries; the historical variety audit (path silhouettes 124, combined structures 325, no similar board or path run longer than two) passed.</p></section>
+<section id="customization"><h2>Customization Guide</h2><ul><li><b>Timing and rewards</b>: the countdown per level is each level's <code>timerSeconds</code>; the kit's win reward is <code>StarterMenuConfig.WinCoinReward</code> (the level's own <code>reward</code> is used only by the game's standalone result screen).</li><li><b>Pour speed</b>: each level's <code>fillPctPerSec</code> (percent of a box per second).</li><li><b>Board framing</b>: <code>Viewport.MaxCellFraction</code> and <code>Viewport.SolveHost</code>; the area is <code>SandBlocksHlkBridge.PlayArea()</code>.</li><li><b>Colours</b>: the palette is in <code>LevelBuilder.PaletteHex</code> and the per-level <code>palette</code> table; box and sand art comes from the existing models and materials.</li><li><b>Progression</b>: edit <code>CampaignPlan.Introductions</code>, the opening table or <code>Plan</code>, then regenerate with the tools (the recorded slots are preserved).</li><li><b>Boosters</b>: unlock levels, grants and prices in <code>BoosterProgression.json</code>.</li></ul></section>
+<section id="format"><h2>Level Format</h2><p>Each <code>Level_N.json</code> holds the grid (<code>cols</code>, <code>rows</code>), the <code>playable</code> board cells and <code>walls</code>, the boxes (<code>pieces</code>: id, colour, absolute cells, footprint <code>shape</code>, <code>rot</code>, <code>mirror</code>, optional <code>key</code> / <code>locks</code>), the tanks (<code>reservoirs</code>: cells, <code>pipe</code>, and per column the sand <code>queue</code> from the bottom layer up as [colour, box cells]), the <code>covers</code> (cells and count), the countdown, pour speed, palette, the board <code>family</code>, the slot <code>index</code> and the proven <code>witness</code>. Level 18, shortened:</p><pre>{
+  &quot;id&quot;: &quot;Level_4&quot;,
+  &quot;number&quot;: 4,
+  &quot;title&quot;: &quot;Level 4&quot;,
+  &quot;grid&quot;: {
+    &quot;cols&quot;: 4,
+    &quot;rows&quot;: 6
+  },
+  &quot;playable&quot;: [
+    [
+      0,
+      2
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      2,
+      2
+    ],
+    [
+      3,
+      2
+    ],
+    [
+      0,
+      3
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      3,
+      3
+    ],
+    [
+      0,
+      4
+    ],
+    [
+      1,
+      4
+    ],
+    [
+      2,
+      4
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      0,
+      5
+    ],
+    [
+      1,
+      5
+    ],
+    [
+      2,
+      5
+    ],
+    [
+      3,
+      5
+    ]
+  ],
+  &quot;walls&quot;: [],
+  &quot;pieces&quot;: [
+    {
+      &quot;id&quot;: &quot;b1&quot;,
+      &quot;colour&quot;: &quot;yellow&quot;,
+      &quot;cells&quot;: [
+        [
+          3,
+          4
+        ]
+      ],
+      &quot;shape&quot;: &quot;box-1x1&quot;,
+      &quot;rot&quot;: 0,
+      &quot;mirror&quot;: false
+    },
+    {
+      &quot;id&quot;: &quot;b2&quot;,
+      &quot;colour&quot;: &quot;darkgreen&quot;,
+      &quot;cells&quot;: [
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          2
+        ]
+      ],
+      &quot;shape&quot;: &quot;box-1x2&quot;,
+      &quot;rot&quot;: 0,
+      &quot;mirror&quot;: false
+    },
+    {
+      &quot;id&quot;: &quot;b3&quot;,
+      &quot;colour&quot;: &quot;yellow&quot;,
+      &quot;cells&quot;: [
+        [
+          2,
+          4
+        ]
+      ],
+      &quot;shape&quot;: &quot;box-1x1&quot;,
+      &quot;rot&quot;: 0,
+      &quot;mirror&quot;: false
+    },
+    {
+      &quot;id&quot;: &quot;b4&quot;,
+      &quot;colour&quot;: &quot;darkgreen&quot;,
+      &quot;cells&quot;: [
+        [
+          1,
+          2
+        ]
+      ],
+      &quot;shape&quot;: &quot;box-1x1&quot;,
+      &quot;rot&quot;: 0,
+      &quot;mirror&quot;: false
+    },
+    {
+      &quot;id&quot;: &quot;b5&quot;,
+      &quot;colour&quot;: &quot;darkgreen&quot;,
+      &quot;cells&quot;: [
+        [
+          1,
+          3
+        ]
+      ],
+      &quot;shape&quot;: &quot;box-1x1&quot;,
+      &quot;rot&quot;: 0,
+      &quot;mirror&quot;: false
+    }
+  ],
+  &quot;reservoirs&quot;: [
+    {
+      &quot;id&quot;: &quot;T1&quot;,
+      &quot;cells&quot;: [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      &quot;pipe&quot;: &quot;none&quot;,
+      &quot;columns&quot;: [
+        {
+          &quot;col&quot;: 0,
+          &quot;queue&quot;: [
+            [
+              &quot;darkgreen&quot;,
+              2
+            ]
+          ]
+        },
+        {
+          &quot;col&quot;: 1,
+          &quot;queue&quot;: [
+            [
+              &quot;yellow&quot;,
+              2
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      &quot;id&quot;: &quot;T2&quot;,
+      &quot;cells&quot;: [
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      &quot;pipe&quot;: &quot;none&quot;,
+      &quot;columns&quot;: [
+        {
+          &quot;col&quot;: 2,
+          &quot;queue&quot;: [
+            [
+              &quot;darkgreen&quot;,
+              1
+            ]
+          ]
+        },
+        {
+          &quot;col&quot;: 3,
+          &quot;queue&quot;: [
+            [
+              &quot;darkgreen&quot;,
+              1
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  &quot;covers&quot;: [],
+  &quot;timerSeconds&quot;: 180,
+  &quot;coins&quot;: 0,
+  &quot;reward&quot;: 40,
+  &quot;doubleReward&quot;: 0,
+  &quot;featurePct&quot;: 0,
+  &quot;featureTitle&quot;: &quot;New Feature!&quot;,
+  &quot;featureIcon&quot;: &quot;silhouette&quot;,
+  &quot;introSeconds&quot;: 0,
+  &quot;timerStartDelay&quot;: 0,
+  &quot;fillPctPerSec&quot;: 100,
+  &quot;boostersLockedBar&quot;: false,
+  &quot;palette&quot;: {
+    &quot;white&quot;: &quot;#EEF0FA&quot;,
+    &quot;black&quot;: &quot;#34323A&quot;,
+    &quot;purple&quot;: &quot;#8A3CF0&quot;,
+    &quot;darkgreen&quot;: &quot;#15806A&quot;,
+    &quot;orange&quot;: &quot;#F2821E&quot;,
+    &quot;yellow&quot;: &quot;#FAD21E&quot;,
+    &quot;blue&quot;: &quot;#2E6CF0&quot;,
+    &quot;green&quot;: &quot;#2ED85A&quot;,
+    &quot;red&quot;: &quot;#EC3C48&quot;,
+    &quot;pink&quot;: &quot;#E64EE6&quot;
+  },
+  &quot;index&quot;: 4,
+  &quot;family&quot;: &quot;twin&quot;,
+  &quot;witness&quot;: [
+    {
+      &quot;piece&quot;: &quot;b5&quot;,
+      &quot;relocation&quot;: false,
+      &quot;path&quot;: [
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          2
+        ]
+      ]
+    },
+    {
+      &quot;piece&quot;: &quot;b4&quot;,
+      &quot;relocation&quot;: false,
+      &quot;path&quot;: [
+        [
+          0,
+          2
+        ]
+      ]
+    },
+    {
+      &quot;piece&quot;: &quot;b3&quot;,
+      &quot;relocation&quot;: false,
+      &quot;path&quot;: [
+        [
+          1,
+          4
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          2
+        ]
+      ]
+    },
+    {
+      &quot;piece&quot;: &quot;b1&quot;,
+      &quot;relocation&quot;: false,
+      &quot;path&quot;: [
+        [
+          2,
+          4
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          2
+        ]
+      ]
+    }
+  ]
+}</pre></section>
+<section id="support"><h2>Support</h2><p>Questions and bug reports: <a href="mailto:satisvizion@gmail.com">satisvizion@gmail.com</a>. Please include the Unity version, the level number and the editor console output.</p></section>
+<section id="legal"><h2>Licences and Notices</h2><h3>Historical Lilita One notice (retired font, not a current packaged dependency; verbatim)</h3><pre>Copyright (c) 2011 Juan Montoreano (juan@remolacha.biz), 
+with Reserved Font Name Lilita
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+This license is copied below, and is also available with a FAQ at:
+http://scripts.sil.org/OFL
+
+
+-----------------------------------------------------------
+SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
+-----------------------------------------------------------
+
+PREAMBLE
+The goals of the Open Font License (OFL) are to stimulate worldwide
+development of collaborative font projects, to support the font creation
+efforts of academic and linguistic communities, and to provide a free and
+open framework in which fonts may be shared and improved in partnership
+with others.
+
+The OFL allows the licensed fonts to be used, studied, modified and
+redistributed freely as long as they are not sold by themselves. The
+fonts, including any derivative works, can be bundled, embedded, 
+redistributed and/or sold with any software provided that any reserved
+names are not used by derivative works. The fonts and derivatives,
+however, cannot be released under any other type of license. The
+requirement for fonts to remain under this license does not apply
+to any document created using the fonts or their derivatives.
+
+DEFINITIONS
+&quot;Font Software&quot; refers to the set of files released by the Copyright
+Holder(s) under this license and clearly marked as such. This may
+include source files, build scripts and documentation.
+
+&quot;Reserved Font Name&quot; refers to any names specified as such after the
+copyright statement(s).
+
+&quot;Original Version&quot; refers to the collection of Font Software components as
+distributed by the Copyright Holder(s).
+
+&quot;Modified Version&quot; refers to any derivative made by adding to, deleting,
+or substituting -- in part or in whole -- any of the components of the
+Original Version, by changing formats or by porting the Font Software to a
+new environment.
+
+&quot;Author&quot; refers to any designer, engineer, programmer, technical
+writer or other person who contributed to the Font Software.
+
+PERMISSION &amp; CONDITIONS
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of the Font Software, to use, study, copy, merge, embed, modify,
+redistribute, and sell modified and unmodified copies of the Font
+Software, subject to the following conditions:
+
+1) Neither the Font Software nor any of its individual components,
+in Original or Modified Versions, may be sold by itself.
+
+2) Original or Modified Versions of the Font Software may be bundled,
+redistributed and/or sold with any software, provided that each copy
+contains the above copyright notice and this license. These can be
+included either as stand-alone text files, human-readable headers or
+in the appropriate machine-readable metadata fields within text or
+binary files as long as those fields can be easily viewed by the user.
+
+3) No Modified Version of the Font Software may use the Reserved Font
+Name(s) unless explicit written permission is granted by the corresponding
+Copyright Holder. This restriction only applies to the primary font name as
+presented to the users.
+
+4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font
+Software shall not be used to promote, endorse or advertise any
+Modified Version, except to acknowledge the contribution(s) of the
+Copyright Holder(s) and the Author(s) or with their explicit written
+permission.
+
+5) The Font Software, modified or unmodified, in part or in whole,
+must be distributed entirely under this license, and must not be
+distributed under any other license. The requirement for fonts to
+remain under this license does not apply to any document created
+using the Font Software.
+
+TERMINATION
+This license becomes null and void if any of the above conditions are
+not met.
+
+DISCLAIMER
+THE FONT SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
+DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
+OTHER DEALINGS IN THE FONT SOFTWARE.
+</pre><p>No additional licence notices were found in this root. Owner provenance confirmation remains required.</p></section>
+<section id="final-current-handoff"><h2>Current delivery and examples</h2><p>Unity 6000.0.62f1 / URP. Support: <a href="mailto:satisvizion@gmail.com">satisvizion@gmail.com</a>.</p><p>Buyer roots: Assets/Game, Assets/HyperCasualLiveOpsKit. Internal production, build and upload folders are excluded. The kit is an owner-approved first-party asset.</p><p>Current campaign: 500 levels. Use the shipped Level Editor and Auto Level Generator menu entries: Tools/Sand Blocks/Documentation, Tools/Sand Blocks/Level Editor, Tools/Sand Blocks/Auto Level Generator.</p><h3>Current complete level example</h3><p>Assets/Game/Resources/Levels/Level_4.json</p><pre>{
+  &quot;id&quot;: &quot;Level_4&quot;,
+  &quot;number&quot;: 4,
+  &quot;title&quot;: &quot;Level 4&quot;,
+  &quot;grid&quot;: {
+    &quot;cols&quot;: 4,
+    &quot;rows&quot;: 6
+  },
+  &quot;playable&quot;: [
+    [
+      0,
+      2
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      2,
+      2
+    ],
+    [
+      3,
+      2
+    ],
+    [
+      0,
+      3
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      3,
+      3
+    ],
+    [
+      0,
+      4
+    ],
+    [
+      1,
+      4
+    ],
+    [
+      2,
+      4
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      0,
+      5
+    ],
+    [
+      1,
+      5
+    ],
+    [
+      2,
+      5
+    ],
+    [
+      3,
+      5
+    ]
+  ],
+  &quot;walls&quot;: [],
+  &quot;pieces&quot;: [
+    {
+      &quot;id&quot;: &quot;b1&quot;,
+      &quot;colour&quot;: &quot;yellow&quot;,
+      &quot;cells&quot;: [
+        [
+          3,
+          4
+        ]
+      ],
+      &quot;shape&quot;: &quot;box-1x1&quot;,
+      &quot;rot&quot;: 0,
+      &quot;mirror&quot;: false
+    },
+    {
+      &quot;id&quot;: &quot;b2&quot;,
+      &quot;colour&quot;: &quot;darkgreen&quot;,
+      &quot;cells&quot;: [
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          2
+        ]
+      ],
+      &quot;shape&quot;: &quot;box-1x2&quot;,
+      &quot;rot&quot;: 0,
+      &quot;mirror&quot;: false
+    },
+    {
+      &quot;id&quot;: &quot;b3&quot;,
+      &quot;colour&quot;: &quot;yellow&quot;,
+      &quot;cells&quot;: [
+        [
+          2,
+          4
+        ]
+      ],
+      &quot;shape&quot;: &quot;box-1x1&quot;,
+      &quot;rot&quot;: 0,
+      &quot;mirror&quot;: false
+    },
+    {
+      &quot;id&quot;: &quot;b4&quot;,
+      &quot;colour&quot;: &quot;darkgreen&quot;,
+      &quot;cells&quot;: [
+        [
+          1,
+          2
+        ]
+      ],
+      &quot;shape&quot;: &quot;box-1x1&quot;,
+      &quot;rot&quot;: 0,
+      &quot;mirror&quot;: false
+    },
+    {
+      &quot;id&quot;: &quot;b5&quot;,
+      &quot;colour&quot;: &quot;darkgreen&quot;,
+      &quot;cells&quot;: [
+        [
+          1,
+          3
+        ]
+      ],
+      &quot;shape&quot;: &quot;box-1x1&quot;,
+      &quot;rot&quot;: 0,
+      &quot;mirror&quot;: false
+    }
+  ],
+  &quot;reservoirs&quot;: [
+    {
+      &quot;id&quot;: &quot;T1&quot;,
+      &quot;cells&quot;: [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      &quot;pipe&quot;: &quot;none&quot;,
+      &quot;columns&quot;: [
+        {
+          &quot;col&quot;: 0,
+          &quot;queue&quot;: [
+            [
+              &quot;darkgreen&quot;,
+              2
+            ]
+          ]
+        },
+        {
+          &quot;col&quot;: 1,
+          &quot;queue&quot;: [
+            [
+              &quot;yellow&quot;,
+              2
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      &quot;id&quot;: &quot;T2&quot;,
+      &quot;cells&quot;: [
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      &quot;pipe&quot;: &quot;none&quot;,
+      &quot;columns&quot;: [
+        {
+          &quot;col&quot;: 2,
+          &quot;queue&quot;: [
+            [
+              &quot;darkgreen&quot;,
+              1
+            ]
+          ]
+        },
+        {
+          &quot;col&quot;: 3,
+          &quot;queue&quot;: [
+            [
+              &quot;darkgreen&quot;,
+              1
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  &quot;covers&quot;: [],
+  &quot;timerSeconds&quot;: 180,
+  &quot;coins&quot;: 0,
+  &quot;reward&quot;: 40,
+  &quot;doubleReward&quot;: 0,
+  &quot;featurePct&quot;: 0,
+  &quot;featureTitle&quot;: &quot;New Feature!&quot;,
+  &quot;featureIcon&quot;: &quot;silhouette&quot;,
+  &quot;introSeconds&quot;: 0,
+  &quot;timerStartDelay&quot;: 0,
+  &quot;fillPctPerSec&quot;: 100,
+  &quot;boostersLockedBar&quot;: false,
+  &quot;palette&quot;: {
+    &quot;white&quot;: &quot;#EEF0FA&quot;,
+    &quot;black&quot;: &quot;#34323A&quot;,
+    &quot;purple&quot;: &quot;#8A3CF0&quot;,
+    &quot;darkgreen&quot;: &quot;#15806A&quot;,
+    &quot;orange&quot;: &quot;#F2821E&quot;,
+    &quot;yellow&quot;: &quot;#FAD21E&quot;,
+    &quot;blue&quot;: &quot;#2E6CF0&quot;,
+    &quot;green&quot;: &quot;#2ED85A&quot;,
+    &quot;red&quot;: &quot;#EC3C48&quot;,
+    &quot;pink&quot;: &quot;#E64EE6&quot;
+  },
+  &quot;index&quot;: 4,
+  &quot;family&quot;: &quot;twin&quot;,
+  &quot;witness&quot;: [
+    {
+      &quot;piece&quot;: &quot;b5&quot;,
+      &quot;relocation&quot;: false,
+      &quot;path&quot;: [
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          2
+        ]
+      ]
+    },
+    {
+      &quot;piece&quot;: &quot;b4&quot;,
+      &quot;relocation&quot;: false,
+      &quot;path&quot;: [
+        [
+          0,
+          2
+        ]
+      ]
+    },
+    {
+      &quot;piece&quot;: &quot;b3&quot;,
+      &quot;relocation&quot;: false,
+      &quot;path&quot;: [
+        [
+          1,
+          4
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          2
+        ]
+      ]
+    },
+    {
+      &quot;piece&quot;: &quot;b1&quot;,
+      &quot;relocation&quot;: false,
+      &quot;path&quot;: [
+        [
+          2,
+          4
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          2
+        ]
+      ]
+    }
+  ]
+}</pre><h3>Level fields</h3><table><tr><th>Field</th><th>JSON type</th></tr><tr><td>id</td><td>str</td></tr><tr><td>number</td><td>int</td></tr><tr><td>title</td><td>str</td></tr><tr><td>grid</td><td>dict</td></tr><tr><td>playable</td><td>list</td></tr><tr><td>walls</td><td>list</td></tr><tr><td>pieces</td><td>list</td></tr><tr><td>reservoirs</td><td>list</td></tr><tr><td>covers</td><td>list</td></tr><tr><td>timerSeconds</td><td>int</td></tr><tr><td>coins</td><td>int</td></tr><tr><td>reward</td><td>int</td></tr><tr><td>doubleReward</td><td>int</td></tr><tr><td>featurePct</td><td>int</td></tr><tr><td>featureTitle</td><td>str</td></tr><tr><td>featureIcon</td><td>str</td></tr><tr><td>introSeconds</td><td>int</td></tr><tr><td>timerStartDelay</td><td>int</td></tr><tr><td>fillPctPerSec</td><td>int</td></tr><tr><td>boostersLockedBar</td><td>bool</td></tr><tr><td>palette</td><td>dict</td></tr><tr><td>index</td><td>int</td></tr><tr><td>family</td><td>str</td></tr><tr><td>witness</td><td>list</td></tr></table><h3>Safe worked editing procedure</h3><ol><li>Open Level 4 in the Level Editor and duplicate it into an unused slot.</li><li>Use the editor’s supported controls for a small placement change; keep legal occupancy and required targets. Do not invent JSON fields.</li><li>Run the shipped validator, correct any rule errors, save, then open the duplicate in gameplay and complete it.</li><li>For generation, record the current seed, request a small append batch using the exposed controls, validate its solutions and confirm the previous campaign prefix is unchanged. Cancelling must leave the campaign unchanged.</li></ol><p>Run these procedures in a clean import of the final candidate before claiming buyer acceptance; restore test additions afterward.</p><h3>Current booster policy</h3><pre>{
+  &quot;schemaVersion&quot;: 1,
+  &quot;gameId&quot;: &quot;sand-blocks&quot;,
+  &quot;defaultProfileId&quot;: &quot;default&quot;,
+  &quot;initialGrant&quot;: 2,
+  &quot;refillAmount&quot;: 1,
+  &quot;baseCoinCost&quot;: 100,
+  &quot;coinCostStep&quot;: 25,
+  &quot;levelsPerPriceStep&quot;: 10,
+  &quot;rewardedTimeoutSeconds&quot;: 90,
+  &quot;boosters&quot;: [
+    {
+      &quot;id&quot;: &quot;sandblocks_freeze&quot;,
+      &quot;unlockLevel&quot;: 2,
+      &quot;rewardedPlacementId&quot;: &quot;booster_refill_sandblocks_freeze&quot;,
+      &quot;reason&quot;: &quot;Module 04 default first unlock (level 2). Instant and always useful: every level runs on the countdown; teaches the booster shelf without a targeting step. The recorded original&#x27;s Level 1 shows four boosters locked until Lv.7 / Lv.9 / Lv.13 / Lv.17 (freeze, hammer, magnet, UFO; the developer did not implement the magnet); the production policy default is used instead.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;sandblocks_hammer&quot;,
+      &quot;unlockLevel&quot;: 7,
+      &quot;rewardedPlacementId&quot;: &quot;booster_refill_sandblocks_hammer&quot;,
+      &quot;reason&quot;: &quot;Module 04 default second unlock (level 7). First targeted booster: every level has visible, unlocked, unfilled boxes at its start, so a valid target exists at its introduction; most useful once a box is walled in.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;sandblocks_ufo&quot;,
+      &quot;unlockLevel&quot;: 12,
+      &quot;rewardedPlacementId&quot;: &quot;booster_refill_sandblocks_ufo&quot;,
+      &quot;reason&quot;: &quot;Module 04 default third unlock (level 12). Targeted and strongest (clears a whole colour from the board and the reservoirs), so it comes last, when boards carry several boxes per colour and layered reservoirs.&quot;
+    }
+  ]
+}</pre><p>Hosting, native-device tests and live-service verification are separately recorded in the delivery handoff. A local build is not proof of a hosted release.</p></section><section id="default-font-policy"><h2>Fonts</h2><p>Unity-provided defaults only: TextMesh Pro default font for TMP text and LegacyRuntime.ttf for legacy Unity UI. Official TMP Essentials must be installed. Do not add custom font files or atlases. Any historical custom-font references above describe an older revision; they are not current dependencies.</p></section><section id="publishing-2026-10-09"><h2>Demo and publishing configuration</h2><p>Current source verified on 2026-10-09. The Android download is a development demo with debug signing; WebGL is a LocalQA showcase. Ads are included as LiveOps provider adapters and test/local configuration; vendor SDKs and production credentials are not bundled in the buyer package. Native device and live store certification remain pending.</p><p>For product help, contact SatisVizion at satisvizion@gmail.com</p><p>See Third-Party Notices.txt in the package for the verified dependency and license inventory.</p><p><a href="https://satisvizion.github.io/Documentations/sand-blocks/HyperCasualLiveOpsKit.html">HyperCasual LiveOps Kit manual</a></p></section><section id="managed-save-guard"><h2>Managed campaign save guard</h2><p>The editor save guard treats CRLF and LF line endings equally, as Windows checkouts can change only those characters. Other external text changes remain protected: reconcile them before saving. This editor-only correction preserves all current runtime level bytes and gameplay rules.</p></section><section id="current-route-validation"><h2>Current route validation</h2><p>All 500 current runtime and authoring winning certificates passed. A separate conservative permanent-wall reachability guard reports 94 existing warnings; these do not prove those levels impossible or establish exhaustive safety for every possible player order. New generator candidates must pass that guard plus exact winning and timer replay. Human difficulty balance remains unmeasured.</p></section></main></body></html>
