@@ -1,0 +1,1595 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bus Crowd — Traffic Jam — Buyer Guide</title><style>body{margin:0;background:#141b2b;color:#e8edf6;font:16px/1.65 system-ui,sans-serif}header,main,nav{max-width:1040px;margin:auto;padding:24px}header{padding-bottom:0}h1{font-size:38px}h2{color:#f2c14e}h3{color:#9fd3ff}nav{display:flex;flex-wrap:wrap;gap:10px 24px;border-bottom:1px solid #34435e}a{color:#9fc4ff}section{padding:12px 0 24px;scroll-margin-top:20px}code,pre{background:#1f2a3f;border-radius:6px}code{padding:2px 5px}pre{padding:16px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:560px;overflow:auto}aside{border-left:4px solid #f2c14e;padding:14px;background:#2a2619}table{border-collapse:collapse;width:100%;table-layout:fixed}td,th{text-align:left;border-bottom:1px solid #34435e;padding:8px 10px;vertical-align:top;overflow-wrap:anywhere}th:first-child,td:first-child{width:34%}main,header,nav{overflow-wrap:anywhere}code{overflow-wrap:anywhere;word-break:break-word}@media(max-width:600px){header,main,nav{padding:16px}h1{font-size:30px}}
+/* Publishing review: readable narrow-width tables and paths. */
+main{min-width:0}table{width:100%;table-layout:fixed}td,th,code,a{overflow-wrap:anywhere}pre{max-width:100%;overflow:auto}
+</style></head><body><header><h1>Bus Crowd — Traffic Jam — Buyer Guide</h1><p>Unity 6000.0.62f1 · Universal Render Pipeline · LocalQA handoff candidate</p></header><nav><a href="#overview">Overview</a><a href="#getting-started">Getting Started</a><a href="#folders">Folder Structure</a><a href="#gameplay">Gameplay</a><a href="#scripts">Scripts Reference</a><a href="#editor">Level Editor</a><a href="#generator">Automatic Level Generator</a><a href="#boosters">Boosters</a><a href="#variation">Level Variation</a><a href="#customization">Customization Guide</a><a href="#format">Level Format</a><a href="#support">Support</a><a href="#legal">Licences and Notices</a><a href="#final-current-handoff">Current delivery</a><a href="#default-font-policy">Fonts</a></nav><main><section id="overview"><h2>Overview</h2>
+<p><strong>Bus Crowd — Traffic Jam</strong> is a portrait traffic-puzzle game for Unity 6000.0.62f1 (URP). A depot of parked buses
+faces a crowd of coloured passengers queuing around a ring road. The player taps a bus whose path out of the depot is clear; it
+drives to one of four parking bays and passengers of its colour board it. A full bus drives away and frees its bay. Every bus
+must leave before the attempt timer runs out.</p>
+<p>The package contains a 500-level validated campaign, three boosters on the HyperCasualLiveOpsKit (HLK) booster bar, mystery
+buses, a level editor and an automatic level generator, and the HLK menu, economy, results and LiveOps screens configured for
+this game in a <em>LocalQA</em> profile (simulated ads and purchases).</p>
+<aside>This is a technical handoff candidate. Desktop gameplay, the level tools and local Windows/Android builds were exercised.
+Native-device acceptance, live ad/billing/game-service providers, original sound authorship review and owner-confirmed asset
+provenance (see AI-DISCLOSURE.txt) remain open. It is not a store-release certification.</aside></section><section id="getting-started"><h2>Getting Started</h2>
+<ol>
+<li>Create a Unity <strong>6000.0.62f1</strong> project with the <strong>Universal Render Pipeline</strong>. Install
+<code>com.unity.inputsystem</code> and <code>com.unity.ugui</code>, then import <em>TMP Essential Resources</em>
+(Window → TextMeshPro → Import TMP Essential Resources).</li>
+<li>Import the package. It creates two folders: <code>Assets/Game</code> and <code>Assets/HyperCasualLiveOpsKit</code>.</li>
+<li>Assign the included pipeline asset <code>Assets/Game/ProjectRenderSettings/PC_RPAsset.asset</code> under Project Settings →
+Graphics (and Quality), and set the colour space to Linear.</li>
+<li>Add the scenes to Build Settings in this order: <code>Assets/HyperCasualLiveOpsKit/StarterMenu/Scenes/HLK_MainMenu.unity</code>,
+then <code>Assets/Game/Scenes/Game.unity</code>.</li>
+<li>Open <code>HLK_MainMenu</code> and press Play. <em>PLAY NEXT LEVEL</em> starts level 1, the guided tutorial.</li>
+</ol>
+<p>Set Player Settings → Resolution to a portrait window (for example 540 × 960) for desktop testing. The game fits its board
+between the HLK top bar, the booster shelf and the banner lane on any portrait aspect.</p></section><section id="folders"><h2>Folder Structure</h2>
+<table><tr><th>Folder</th><th>Contents</th></tr>
+<tr><td><code>Game/Scripts/Core</code></td><td>Pure C# rules: <code>GameSim</code> (fixed 1/60 s simulation, dispatch, parking, boarding, crowd, timer, boosters, mystery reveal), <code>LevelData</code> (level JSON parser), geometry and JSON helpers. No UnityEngine references.</td></tr>
+<tr><td><code>Game/Scripts/Game</code></td><td>Unity presentation: <code>GameController</code> (input, clock, events), <code>Viewport</code> (code-built camera and portrait fit), vehicle/crowd/environment/effects views, HUD, tutorial hand.</td></tr>
+<tr><td><code>Game/Campaign</code></td><td>Pure C# campaign model: board templates, formation families, constructive generator, solver and policies, the frozen chapter progression.</td></tr>
+<tr><td><code>Game/Integration</code></td><td>HLK boundary: <code>BusCrowdHlkBridge</code> (level selection, settlement, rewards, sound cues), <code>BusCrowdLevelSource</code>, <code>BusCrowdPowerUpAdapter</code> and its three booster assets, the campaign menu binding.</td></tr>
+<tr><td><code>Game/CampaignLevels/Resources/Levels</code></td><td>The published campaign <code>Level_1.json … Level_500.json</code> plus <code>CampaignAuthoring.json</code> (editor authoring data). Loaded at runtime with <code>Resources.Load("Levels/Level_N")</code>.</td></tr>
+<tr><td><code>Game/Resources</code></td><td>The two recorded source levels (<code>level-1</code>, <code>level-200</code>), vehicle models, materials, the soft-toy shader and palette.</td></tr>
+<tr><td><code>Game/LevelTools</code>, <code>Game/ProductionLevelTools</code></td><td>Editor-only level editor and generator (Bus Crowd adapter + shared framework).</td></tr>
+<tr><td><code>Game/Scenes/Game.unity</code></td><td>Gameplay scene: the game root with the HLK gameplay overlay. The world, camera and HUD are built in code at runtime.</td></tr>
+<tr><td><code>Game/ProjectRenderSettings</code></td><td>URP pipeline/renderer assets used by the game.</td></tr>
+<tr><td><code>HyperCasualLiveOpsKit</code></td><td>Menu, results, economy, boosters UI, LiveOps and service interfaces; see its own manual.</td></tr></table></section><section id="gameplay"><h2>Gameplay</h2>
+<ul>
+<li><strong>Dispatch.</strong> Tap a bus. If nothing stands in its exit path and a bay is free, it drives to the bay. A blocked bus
+bumps the blocker and returns; with all four bays taken the tap is refused ("Slots Full").</li>
+<li><strong>Boarding.</strong> The passenger at the front of the ring boards a parked bus of the same colour. Rows of four keep
+coming from one or two feeder arms. Long, medium and small buses hold different numbers of riders.</li>
+<li><strong>Leaving.</strong> A full bus drives away and frees its bay. The level is won when every bus has left.</li>
+<li><strong>Timer.</strong> Each level has an attempt time limit (from the level JSON, scaled by chapter). When it runs out the
+level is lost; <em>TRY AGAIN</em> restarts the attempt.</li>
+<li><strong>Mystery buses</strong> (from chapter 5) show a “?” cover and cannot be dispatched until the stated number of other
+buses have left; then their colour is revealed.</li>
+<li><strong>Tutorial.</strong> Level 1 guides the first four dispatches with a hand pointer.</li>
+</ul>
+<p>Win/lose settlement goes through HLK once per attempt: a win credits the configured coin reward and opens the results
+overlay; a loss credits nothing. Gameplay sound cues (bus released, blocked tap, full bus, mystery reveal, win, lose) are
+played through the HLK sound bank and follow the Settings sound toggle.</p></section><section id="scripts"><h2>Scripts Reference</h2>
+<table><tr><th>Type</th><th>Role</th></tr>
+<tr><td><code>BusCrowd.Core.GameSim</code></td><td>Deterministic rules. <code>TapVehicle(i)</code>, <code>Step()</code>, events (<code>SimEventKind</code>), <code>Phase</code>, <code>TimeLimit</code>; booster effects <code>CrowdShuffleEffect()</code>, <code>AirliftEffect(i)</code>, <code>BusShuffleEffect()</code>.</td></tr>
+<tr><td><code>BusCrowd.Core.LevelData</code></td><td>Parses the level JSON (see <a href="#format">Level Format</a>).</td></tr>
+<tr><td><code>BusCrowd.Game.GameController</code></td><td>Owns the simulation, maps pointer input to taps, advances the clock and raises <code>OnSimEvent</code>/<code>LevelStarted</code>. Integration seams: <code>ExternalResults</code>, <code>ExternalBoosters</code>, <code>PointerBlocked</code>, <code>TapInterceptor</code>, <code>PlayRectProvider</code>.</td></tr>
+<tr><td><code>BusCrowd.Game.Viewport</code></td><td>Builds the game camera in code and fits the depot column into the reserved play rectangle.</td></tr>
+<tr><td><code>BusCrowd.Integration.BusCrowdHlkBridge</code></td><td>Selects the HLK level, blocks gameplay input under overlays, settles results, emits <code>buscrowd_level_end</code>, plays semantic sound cues and hands the audio listener to the code-built camera.</td></tr>
+<tr><td><code>BusCrowd.Integration.BusCrowdLevelSource</code></td><td>Maps the HLK level index to <code>Levels/Level_N</code>.</td></tr>
+<tr><td><code>BusCrowd.Integration.BusCrowdPowerUpAdapter</code></td><td>Registers the three boosters with the HLK booster bar (effects + availability).</td></tr>
+<tr><td><code>BusCrowd.Campaign.*</code></td><td><code>Progression</code> (chapters), <code>Formations</code>, <code>Generator</code>, <code>Solver</code> (<code>Replay</code>, <code>Greedy</code>, <code>FindLosingRoute</code>).</td></tr></table></section><section id="editor"><h2>Level Editor</h2><p>The current preview draws vehicle lengths, widths and routes at the same fitted physical-world scale. Controls use normal editor layout so dummy Layout-event rectangles do not clip the control rows. Recorded evidence levels remain read-only in this canvas; their first-layout preview is guarded.</p>
+<p>Open <strong>Tools → BusCrowd → Level Editor</strong>. The window lists all published levels with a live canvas preview of
+the depot (bus sizes, colours and headings, mystery marks), the crowd rows and the saved witness order.</p>
+<ul><li><em>Validate selected</em> checks the selected level's rules (every bus can leave, per-colour seats equal waiting
+passengers, bays and timer) and replays its saved witness to a win.</li>
+<li><em>Duplicate</em>, <em>Delete</em>, <em>Up</em>/<em>Down</em> reorder the campaign; <em>Undo</em> reverts the last edit (up to 64).</li>
+<li><em>Apply data edit (invalidates witness)</em> applies a hand edit of the level payload. The old witness no longer proves the
+edited level, so validation fails until a new proven order is stored (regenerate the level if needed).</li>
+<li><em>Play saved level</em> opens the gameplay scene on the selected level.</li>
+<li><em>Validate + save</em> validates the whole campaign first; publication is staged and swapped in one step, and an invalid or
+cancelled save leaves the existing JSON untouched. Previous versions are kept under <code>Artifacts/Phase04/Backups</code>.
+<em>Reload</em> discards unsaved edits.</li></ul>
+<p>Levels 1 and 200 are the recorded source levels and must stay in place; the campaign check refuses a save that moves them.</p></section><section id="generator"><h2>Automatic Level Generator</h2>
+<p>Open <strong>Tools → BusCrowd → Auto Level Generator</strong> (the same window; the generator controls are in the lower
+panel). The saved request holds <code>count</code>, <code>seed</code>, <code>attemptsPerLevel</code>,
+<code>minimumFormations</code>, <code>maximumRepeatStreak</code> and <code>append</code>. In a fresh project it is recreated from
+the campaign's own <code>CampaignAuthoring.json</code>.</p>
+<p>Generation is constructive: it picks a formation for the level's chapter, builds a blocking order from the real sweep rules,
+generates the crowd sequence (with decoys), and proves a witness dispatch order by replaying it through the actual
+<code>GameSim</code>. A candidate that fails validation or its witness is retried. With <code>append</code> on, existing levels
+are kept byte-for-byte and only new ones are added (for example count 502 appends levels 501–502). The same seed reproduces
+the same campaign. <em>Generate into editor (review, then save)</em> fills the editor with the result; nothing is published until
+<em>Validate + save</em>. <em>Save request</em> stores the settings.</p></section><section id="boosters"><h2>Boosters</h2>
+<table><tr><th>Booster</th><th>Effect</th><th>Start count</th></tr>
+<tr><td>Crowd Shuffle</td><td>Brings a row of a parked bus's colour forward in the queue (instant). Refused when no row matches.</td><td>2 on unlock</td></tr>
+<tr><td>Balloon</td><td>Arm, then tap a blocked bus: it is lifted straight into a free bay. Missed taps and hidden buses keep it armed at no cost; a second press cancels.</td><td>2 on unlock</td></tr>
+<tr><td>Bus Shuffle</td><td>Swaps equal-size waiting buses in a short staggered flight; taps wait until they land.</td><td>2 on unlock</td></tr></table>
+<p>Crowd Shuffle, Balloon and Bus Shuffle unlock at player levels 2, 7 and 12 respectively. Each receives two initial uses and is consumed once per successful activation. The current progression policy is included in the current-delivery section; per-booster offer overrides take precedence. Counts, prices and unlock level are defined in
+<code>Game/Integration/PowerUps/*.asset</code> and the HLK power-up catalog.</p></section><section id="variation"><h2>Level Variation</h2>
+<p>The campaign has nine chapters: First taps, Blocked paths, Cars and decoys, Two arms, Mystery buses, Dense depots, Super hard,
+Master depots and Grand master. Chapters raise the bus count (4–6 in chapter 1 up to 60–84 in chapter 9),
+colours, blocking depth, decoy ratio and mystery buses, and tighten the time factor; recovery levels follow difficulty peaks.
+Two board templates (A: large buses, B: the Level 200 depot), three crowd topologies (left arm, right arm, both arms) and twelve
+formation families with dense variants give 190 distinct depot formations in the current campaign with no formation repeated more than twice in a row.</p></section><section id="customization"><h2>Customization Guide</h2>
+<ul><li><strong>Win reward, menu copy, level count:</strong> <code>HyperCasualLiveOpsKit/StarterMenu/Resources/HLK/StarterMenuConfig.asset</code>.</li>
+<li><strong>Economy, ads, purchases, services:</strong> <code>HLKSettings</code> (see the kit manual). Replace LocalQA/mock providers with real ones before release.</li>
+<li><strong>Colours and palette:</strong> <code>Game/Resources/palette.json</code>.</li>
+<li><strong>Vehicle models:</strong> <code>Game/Resources/Generated/*.glb</code>; the procedural fallback is used when <code>GeneratedModels.Enabled</code> is false.</li>
+<li><strong>Timing:</strong> per-level <code>timeLimitSeconds</code> and the chapter time factor in <code>Campaign/Progression.cs</code>.</li>
+<li><strong>New levels:</strong> use the editor/generator rather than editing JSON by hand, so each level keeps a proven witness.</li></ul></section><section id="format"><h2>Level Format</h2>
+<p>Each level is one JSON file. Coordinates are normalised to the portrait design frame. Key fields:
+<code>vehicles</code> (id, colour, size, capacity, x, y, headingDeg, length, width), <code>slots</code> (the four bays),
+<code>crowd</code> (<code>rowSize</code>, the ring path and its queued <code>rows</code> as [colour, row count], feeder arms),
+<code>timeLimitSeconds</code>, <code>mystery</code> (bus id + reveal count), <code>generator</code> (formation provenance) and
+<code>solution</code> (the proven witness order and its duration). Below is the complete published <code>Level_4.json</code>:</p>
+<pre>{
+  &quot;schemaVersion&quot;: 1,
+  &quot;id&quot;: &quot;Level_4&quot;,
+  &quot;number&quot;: 4,
+  &quot;caption&quot;: &quot;LEVEL 4&quot;,
+  &quot;design&quot;: {
+    &quot;aspect&quot;: [
+      9,
+      20
+    ],
+    &quot;unitsPerHeight&quot;: 20,
+    &quot;cameraPitchDeg&quot;: 60
+  },
+  &quot;generator&quot;: {
+    &quot;board&quot;: &quot;B&quot;,
+    &quot;topology&quot;: &quot;Double&quot;,
+    &quot;big&quot;: true,
+    &quot;family&quot;: &quot;echelon&quot;,
+    &quot;cols&quot;: 3,
+    &quot;rows&quot;: 6,
+    &quot;headings&quot;: &quot;24-72e58685&quot;,
+    &quot;seed&quot;: 1621612758,
+    &quot;source&quot;: &quot;generated&quot;,
+    &quot;route&quot;: &quot;stadium&quot;
+  },
+  &quot;vehicles&quot;: [
+    {
+      &quot;id&quot;: &quot;V01&quot;,
+      &quot;colour&quot;: &quot;red&quot;,
+      &quot;size&quot;: &quot;long&quot;,
+      &quot;capacity&quot;: 40,
+      &quot;x&quot;: 0.5792,
+      &quot;y&quot;: 0.4998,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.778,
+      &quot;width&quot;: 0.685
+    },
+    {
+      &quot;id&quot;: &quot;V02&quot;,
+      &quot;colour&quot;: &quot;purple&quot;,
+      &quot;size&quot;: &quot;long&quot;,
+      &quot;capacity&quot;: 40,
+      &quot;x&quot;: 0.6682,
+      &quot;y&quot;: 0.5198,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.778,
+      &quot;width&quot;: 0.685
+    },
+    {
+      &quot;id&quot;: &quot;V03&quot;,
+      &quot;colour&quot;: &quot;blue&quot;,
+      &quot;size&quot;: &quot;long&quot;,
+      &quot;capacity&quot;: 40,
+      &quot;x&quot;: 0.7572,
+      &quot;y&quot;: 0.5399,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.778,
+      &quot;width&quot;: 0.685
+    },
+    {
+      &quot;id&quot;: &quot;V04&quot;,
+      &quot;colour&quot;: &quot;green&quot;,
+      &quot;size&quot;: &quot;car&quot;,
+      &quot;capacity&quot;: 16,
+      &quot;x&quot;: 0.467,
+      &quot;y&quot;: 0.5755,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.0668,
+      &quot;width&quot;: 0.5224
+    },
+    {
+      &quot;id&quot;: &quot;V05&quot;,
+      &quot;colour&quot;: &quot;blue&quot;,
+      &quot;size&quot;: &quot;car&quot;,
+      &quot;capacity&quot;: 16,
+      &quot;x&quot;: 0.5561,
+      &quot;y&quot;: 0.5955,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.0668,
+      &quot;width&quot;: 0.5224
+    },
+    {
+      &quot;id&quot;: &quot;V06&quot;,
+      &quot;colour&quot;: &quot;yellow&quot;,
+      &quot;size&quot;: &quot;long&quot;,
+      &quot;capacity&quot;: 40,
+      &quot;x&quot;: 0.6451,
+      &quot;y&quot;: 0.6155,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.778,
+      &quot;width&quot;: 0.685
+    },
+    {
+      &quot;id&quot;: &quot;V07&quot;,
+      &quot;colour&quot;: &quot;blue&quot;,
+      &quot;size&quot;: &quot;car&quot;,
+      &quot;capacity&quot;: 16,
+      &quot;x&quot;: 0.3549,
+      &quot;y&quot;: 0.6512,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.0668,
+      &quot;width&quot;: 0.5224
+    },
+    {
+      &quot;id&quot;: &quot;V08&quot;,
+      &quot;colour&quot;: &quot;blue&quot;,
+      &quot;size&quot;: &quot;long&quot;,
+      &quot;capacity&quot;: 40,
+      &quot;x&quot;: 0.4439,
+      &quot;y&quot;: 0.6712,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.778,
+      &quot;width&quot;: 0.685
+    },
+    {
+      &quot;id&quot;: &quot;V09&quot;,
+      &quot;colour&quot;: &quot;purple&quot;,
+      &quot;size&quot;: &quot;car&quot;,
+      &quot;capacity&quot;: 16,
+      &quot;x&quot;: 0.533,
+      &quot;y&quot;: 0.6912,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.0668,
+      &quot;width&quot;: 0.5224
+    },
+    {
+      &quot;id&quot;: &quot;V10&quot;,
+      &quot;colour&quot;: &quot;red&quot;,
+      &quot;size&quot;: &quot;car&quot;,
+      &quot;capacity&quot;: 16,
+      &quot;x&quot;: 0.2428,
+      &quot;y&quot;: 0.7268,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.0668,
+      &quot;width&quot;: 0.5224
+    },
+    {
+      &quot;id&quot;: &quot;V11&quot;,
+      &quot;colour&quot;: &quot;green&quot;,
+      &quot;size&quot;: &quot;long&quot;,
+      &quot;capacity&quot;: 40,
+      &quot;x&quot;: 0.3318,
+      &quot;y&quot;: 0.7469,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.778,
+      &quot;width&quot;: 0.685
+    }
+  ],
+  &quot;lot&quot;: {
+    &quot;rect&quot;: [
+      0,
+      0.425,
+      1,
+      0.8417
+    ]
+  },
+  &quot;road&quot;: {
+    &quot;laneV&quot;: 0.4167,
+    &quot;departLaneV&quot;: 0.4278,
+    &quot;topV&quot;: 0.3125,
+    &quot;bottomV&quot;: 0.4417,
+    &quot;exitEdge&quot;: &quot;left&quot;
+  },
+  &quot;slots&quot;: {
+    &quot;count&quot;: 4,
+    &quot;lockedCount&quot;: 3,
+    &quot;tiltDeg&quot;: 15,
+    &quot;parkedHeadingDeg&quot;: -75,
+    &quot;centers&quot;: [
+      [
+        0.2516,
+        0.375
+      ],
+      [
+        0.3459,
+        0.375
+      ],
+      [
+        0.4371,
+        0.375
+      ],
+      [
+        0.5283,
+        0.375
+      ]
+    ],
+    &quot;locked&quot;: [
+      [
+        0.6195,
+        0.375
+      ],
+      [
+        0.7107,
+        0.375
+      ],
+      [
+        0.8019,
+        0.375
+      ]
+    ],
+    &quot;size&quot;: [
+      0.623,
+      1.444
+    ],
+    &quot;counterOffsetV&quot;: -0.0111
+  },
+  &quot;hud&quot;: {
+    &quot;speedPill&quot;: {
+      &quot;u&quot;: 0.9026,
+      &quot;v&quot;: 0.306,
+      &quot;w&quot;: 0.177,
+      &quot;h&quot;: 0.037
+    },
+    &quot;caption&quot;: {
+      &quot;u&quot;: 0.5,
+      &quot;v&quot;: 0.06
+    }
+  },
+  &quot;bushes&quot;: [
+    [
+      0.1101,
+      0.2639
+    ],
+    [
+      0.8899,
+      0.2639
+    ]
+  ],
+  &quot;speedPill&quot;: {
+    &quot;initial&quot;: 1,
+    &quot;multipliers&quot;: {
+      &quot;1&quot;: 1,
+      &quot;2&quot;: 1.93,
+      &quot;3&quot;: 2.78
+    },
+    &quot;holdToTripleSeconds&quot;: 0.25
+  },
+  &quot;crowd&quot;: {
+    &quot;rowSize&quot;: 4,
+    &quot;rowPitchUnits&quot;: 0.2586,
+    &quot;speedUnitsPerSec&quot;: 0.9815,
+    &quot;ring&quot;: {
+      &quot;path&quot;: [
+        [
+          0.5157,
+          0.2917
+        ],
+        [
+          0.4843,
+          0.2919
+        ],
+        [
+          0.453,
+          0.2924
+        ],
+        [
+          0.4216,
+          0.2927
+        ],
+        [
+          0.3902,
+          0.2926
+        ],
+        [
+          0.359,
+          0.2913
+        ],
+        [
+          0.3282,
+          0.289
+        ],
+        [
+          0.3021,
+          0.2826
+        ],
+        [
+          0.29,
+          0.2714
+        ],
+        [
+          0.2842,
+          0.2594
+        ],
+        [
+          0.2811,
+          0.2472
+        ],
+        [
+          0.2829,
+          0.235
+        ],
+        [
+          0.2891,
+          0.223
+        ],
+        [
+          0.3017,
+          0.2119
+        ],
+        [
+          0.3281,
+          0.2057
+        ],
+        [
+          0.359,
+          0.2036
+        ],
+        [
+          0.3902,
+          0.2024
+        ],
+        [
+          0.4216,
+          0.2023
+        ],
+        [
+          0.4529,
+          0.2026
+        ],
+        [
+          0.4843,
+          0.203
+        ],
+        [
+          0.5157,
+          0.2032
+        ],
+        [
+          0.5471,
+          0.203
+        ],
+        [
+          0.5785,
+          0.2026
+        ],
+        [
+          0.6098,
+          0.2023
+        ],
+        [
+          0.6412,
+          0.2024
+        ],
+        [
+          0.6724,
+          0.2036
+        ],
+        [
+          0.7033,
+          0.2057
+        ],
+        [
+          0.7297,
+          0.2119
+        ],
+        [
+          0.7423,
+          0.223
+        ],
+        [
+          0.7485,
+          0.235
+        ],
+        [
+          0.7503,
+          0.2472
+        ],
+        [
+          0.7472,
+          0.2594
+        ],
+        [
+          0.7414,
+          0.2714
+        ],
+        [
+          0.7293,
+          0.2826
+        ],
+        [
+          0.7032,
+          0.289
+        ],
+        [
+          0.6724,
+          0.2913
+        ],
+        [
+          0.6412,
+          0.2926
+        ],
+        [
+          0.6098,
+          0.2927
+        ],
+        [
+          0.5784,
+          0.2924
+        ],
+        [
+          0.5471,
+          0.2919
+        ]
+      ],
+      &quot;closed&quot;: true,
+      &quot;exitIndex&quot;: 0,
+      &quot;direction&quot;: &quot;clockwise&quot;,
+      &quot;rows&quot;: [
+        [
+          &quot;blue&quot;,
+          3
+        ],
+        [
+          &quot;green&quot;,
+          1
+        ],
+        [
+          &quot;blue&quot;,
+          5
+        ],
+        [
+          &quot;purple&quot;,
+          1
+        ],
+        [
+          &quot;green&quot;,
+          1
+        ],
+        [
+          &quot;blue&quot;,
+          1
+        ],
+        [
+          &quot;purple&quot;,
+          2
+        ],
+        [
+          &quot;blue&quot;,
+          1
+        ],
+        [
+          &quot;purple&quot;,
+          6
+        ],
+        [
+          &quot;red&quot;,
+          2
+        ],
+        [
+          &quot;purple&quot;,
+          1
+        ],
+        [
+          &quot;red&quot;,
+          1
+        ],
+        [
+          &quot;blue&quot;,
+          3
+        ],
+        [
+          &quot;green&quot;,
+          4
+        ],
+        [
+          &quot;red&quot;,
+          10
+        ],
+        [
+          &quot;blue&quot;,
+          1
+        ],
+        [
+          &quot;red&quot;,
+          1
+        ]
+      ],
+      &quot;phaseOffsetUnits&quot;: -0.1093,
+      &quot;junctions&quot;: {
+        &quot;left&quot;: [
+          0.3008,
+          0.2127
+        ],
+        &quot;right&quot;: [
+          0.7306,
+          0.2127
+        ]
+      }
+    },
+    &quot;feeders&quot;: [
+      {
+        &quot;id&quot;: &quot;left&quot;,
+        &quot;junction&quot;: &quot;left&quot;,
+        &quot;path&quot;: [
+          [
+            0.0957,
+            0.0232
+          ],
+          [
+            0.0954,
+            0.0389
+          ],
+          [
+            0.095,
+            0.0546
+          ],
+          [
+            0.0949,
+            0.0703
+          ],
+          [
+            0.096,
+            0.0859
+          ],
+          [
+            0.0974,
+            0.1016
+          ],
+          [
+            0.1,
+            0.1173
+          ],
+          [
+            0.1055,
+            0.1328
+          ],
+          [
+            0.1149,
+            0.1481
+          ],
+          [
+            0.1286,
+            0.1628
+          ],
+          [
+            0.1491,
+            0.1763
+          ],
+          [
+            0.1759,
+            0.1879
+          ],
+          [
+            0.2091,
+            0.1967
+          ],
+          [
+            0.3008,
+            0.2127
+          ]
+        ],
+        &quot;rows&quot;: [
+          [
+            &quot;blue&quot;,
+            8
+          ],
+          [
+            &quot;yellow&quot;,
+            1
+          ],
+          [
+            &quot;green&quot;,
+            1
+          ],
+          [
+            &quot;blue&quot;,
+            1
+          ],
+          [
+            &quot;green&quot;,
+            1
+          ],
+          [
+            &quot;yellow&quot;,
+            1
+          ],
+          [
+            &quot;green&quot;,
+            4
+          ],
+          [
+            &quot;yellow&quot;,
+            2
+          ],
+          [
+            &quot;blue&quot;,
+            2
+          ],
+          [
+            &quot;green&quot;,
+            2
+          ]
+        ]
+      },
+      {
+        &quot;id&quot;: &quot;right&quot;,
+        &quot;junction&quot;: &quot;right&quot;,
+        &quot;path&quot;: [
+          [
+            0.9357,
+            0.0232
+          ],
+          [
+            0.936,
+            0.0389
+          ],
+          [
+            0.9364,
+            0.0546
+          ],
+          [
+            0.9365,
+            0.0703
+          ],
+          [
+            0.9354,
+            0.0859
+          ],
+          [
+            0.934,
+            0.1016
+          ],
+          [
+            0.9314,
+            0.1173
+          ],
+          [
+            0.9259,
+            0.1328
+          ],
+          [
+            0.9165,
+            0.1481
+          ],
+          [
+            0.9028,
+            0.1628
+          ],
+          [
+            0.8823,
+            0.1763
+          ],
+          [
+            0.8555,
+            0.1879
+          ],
+          [
+            0.8223,
+            0.1967
+          ],
+          [
+            0.7306,
+            0.2127
+          ]
+        ],
+        &quot;rows&quot;: [
+          [
+            &quot;blue&quot;,
+            1
+          ],
+          [
+            &quot;yellow&quot;,
+            1
+          ],
+          [
+            &quot;blue&quot;,
+            2
+          ],
+          [
+            &quot;purple&quot;,
+            1
+          ],
+          [
+            &quot;yellow&quot;,
+            5
+          ],
+          [
+            &quot;purple&quot;,
+            3
+          ]
+        ]
+      }
+    ],
+    &quot;exit&quot;: {
+      &quot;u&quot;: 0.5157,
+      &quot;v&quot;: 0.2917
+    }
+  },
+  &quot;timing&quot;: {
+    &quot;vehicleSpeedUnitsPerSec&quot;: 17.222,
+    &quot;exitSpeedUnitsPerSec&quot;: 21,
+    &quot;laneSpeedUnitsPerSec&quot;: 15,
+    &quot;parkSeconds&quot;: 0.2,
+    &quot;reverseOutSeconds&quot;: 0.4,
+    &quot;reverseOutUnits&quot;: 1.245,
+    &quot;departSpeedUnitsPerSec&quot;: 14.444,
+    &quot;bumpSpeedUnitsPerSec&quot;: 17.222,
+    &quot;bumpFlashSeconds&quot;: 0.07,
+    &quot;bumpBurstSeconds&quot;: 0.35,
+    &quot;slotsFullPopupSeconds&quot;: 0.6,
+    &quot;slotsFullFadeSeconds&quot;: 0.1,
+    &quot;slotBlinkPeriod&quot;: 1,
+    &quot;slotBlinkOn&quot;: 0.3,
+    &quot;winDelayAfterLastDeparture&quot;: 1.56,
+    &quot;flashToConfetti&quot;: 0.04,
+    &quot;confettiSeconds&quot;: 0.3
+  },
+  &quot;timeLimitSeconds&quot;: 90,
+  &quot;mystery&quot;: [],
+  &quot;solution&quot;: {
+    &quot;order&quot;: [
+      &quot;V01&quot;,
+      &quot;V04&quot;,
+      &quot;V07&quot;,
+      &quot;V10&quot;,
+      &quot;V02&quot;,
+      &quot;V05&quot;,
+      &quot;V08&quot;,
+      &quot;V11&quot;,
+      &quot;V03&quot;,
+      &quot;V06&quot;,
+      &quot;V09&quot;
+    ],
+    &quot;seconds&quot;: 24.2
+  }
+}</pre></section><section id="support"><h2>Support</h2>
+<p>Contact <a href="mailto:satisvizion@gmail.com">satisvizion@gmail.com</a> with the Unity version, the level number and
+reproducible steps. Do not send account credentials. Read AI-DISCLOSURE.txt for the provenance items the owner must confirm.</p></section><section id="legal"><h2>Licences and Notices</h2><p>No additional licence notices were found in this root. Owner provenance confirmation remains required.</p></section><section id="final-current-handoff"><h2>Current delivery and examples</h2><p>Unity 6000.0.62f1 / URP. Support: <a href="mailto:satisvizion@gmail.com">satisvizion@gmail.com</a>.</p><p>Buyer roots: Assets/Game, Assets/HyperCasualLiveOpsKit. Internal production, build and upload folders are excluded. The kit is an owner-approved first-party asset.</p><p>Current campaign: 500 levels. Use the shipped Level Editor and Auto Level Generator menu entries: Tools/BusCrowd/Documentation, Tools/BusCrowd/Level Editor, Tools/BusCrowd/Auto Level Generator.</p><h3>Current complete level example</h3><p>Assets/Game/CampaignLevels/Resources/Levels/Level_4.json</p><pre>{
+  &quot;schemaVersion&quot;: 1,
+  &quot;id&quot;: &quot;Level_4&quot;,
+  &quot;number&quot;: 4,
+  &quot;caption&quot;: &quot;LEVEL 4&quot;,
+  &quot;design&quot;: {
+    &quot;aspect&quot;: [
+      9,
+      20
+    ],
+    &quot;unitsPerHeight&quot;: 20,
+    &quot;cameraPitchDeg&quot;: 60
+  },
+  &quot;generator&quot;: {
+    &quot;board&quot;: &quot;B&quot;,
+    &quot;topology&quot;: &quot;Double&quot;,
+    &quot;big&quot;: true,
+    &quot;family&quot;: &quot;echelon&quot;,
+    &quot;cols&quot;: 3,
+    &quot;rows&quot;: 6,
+    &quot;headings&quot;: &quot;24-72e58685&quot;,
+    &quot;seed&quot;: 1621612758,
+    &quot;source&quot;: &quot;generated&quot;,
+    &quot;route&quot;: &quot;stadium&quot;
+  },
+  &quot;vehicles&quot;: [
+    {
+      &quot;id&quot;: &quot;V01&quot;,
+      &quot;colour&quot;: &quot;red&quot;,
+      &quot;size&quot;: &quot;long&quot;,
+      &quot;capacity&quot;: 40,
+      &quot;x&quot;: 0.5792,
+      &quot;y&quot;: 0.4998,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.778,
+      &quot;width&quot;: 0.685
+    },
+    {
+      &quot;id&quot;: &quot;V02&quot;,
+      &quot;colour&quot;: &quot;purple&quot;,
+      &quot;size&quot;: &quot;long&quot;,
+      &quot;capacity&quot;: 40,
+      &quot;x&quot;: 0.6682,
+      &quot;y&quot;: 0.5198,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.778,
+      &quot;width&quot;: 0.685
+    },
+    {
+      &quot;id&quot;: &quot;V03&quot;,
+      &quot;colour&quot;: &quot;blue&quot;,
+      &quot;size&quot;: &quot;long&quot;,
+      &quot;capacity&quot;: 40,
+      &quot;x&quot;: 0.7572,
+      &quot;y&quot;: 0.5399,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.778,
+      &quot;width&quot;: 0.685
+    },
+    {
+      &quot;id&quot;: &quot;V04&quot;,
+      &quot;colour&quot;: &quot;green&quot;,
+      &quot;size&quot;: &quot;car&quot;,
+      &quot;capacity&quot;: 16,
+      &quot;x&quot;: 0.467,
+      &quot;y&quot;: 0.5755,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.0668,
+      &quot;width&quot;: 0.5224
+    },
+    {
+      &quot;id&quot;: &quot;V05&quot;,
+      &quot;colour&quot;: &quot;blue&quot;,
+      &quot;size&quot;: &quot;car&quot;,
+      &quot;capacity&quot;: 16,
+      &quot;x&quot;: 0.5561,
+      &quot;y&quot;: 0.5955,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.0668,
+      &quot;width&quot;: 0.5224
+    },
+    {
+      &quot;id&quot;: &quot;V06&quot;,
+      &quot;colour&quot;: &quot;yellow&quot;,
+      &quot;size&quot;: &quot;long&quot;,
+      &quot;capacity&quot;: 40,
+      &quot;x&quot;: 0.6451,
+      &quot;y&quot;: 0.6155,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.778,
+      &quot;width&quot;: 0.685
+    },
+    {
+      &quot;id&quot;: &quot;V07&quot;,
+      &quot;colour&quot;: &quot;blue&quot;,
+      &quot;size&quot;: &quot;car&quot;,
+      &quot;capacity&quot;: 16,
+      &quot;x&quot;: 0.3549,
+      &quot;y&quot;: 0.6512,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.0668,
+      &quot;width&quot;: 0.5224
+    },
+    {
+      &quot;id&quot;: &quot;V08&quot;,
+      &quot;colour&quot;: &quot;blue&quot;,
+      &quot;size&quot;: &quot;long&quot;,
+      &quot;capacity&quot;: 40,
+      &quot;x&quot;: 0.4439,
+      &quot;y&quot;: 0.6712,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.778,
+      &quot;width&quot;: 0.685
+    },
+    {
+      &quot;id&quot;: &quot;V09&quot;,
+      &quot;colour&quot;: &quot;purple&quot;,
+      &quot;size&quot;: &quot;car&quot;,
+      &quot;capacity&quot;: 16,
+      &quot;x&quot;: 0.533,
+      &quot;y&quot;: 0.6912,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.0668,
+      &quot;width&quot;: 0.5224
+    },
+    {
+      &quot;id&quot;: &quot;V10&quot;,
+      &quot;colour&quot;: &quot;red&quot;,
+      &quot;size&quot;: &quot;car&quot;,
+      &quot;capacity&quot;: 16,
+      &quot;x&quot;: 0.2428,
+      &quot;y&quot;: 0.7268,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.0668,
+      &quot;width&quot;: 0.5224
+    },
+    {
+      &quot;id&quot;: &quot;V11&quot;,
+      &quot;colour&quot;: &quot;green&quot;,
+      &quot;size&quot;: &quot;long&quot;,
+      &quot;capacity&quot;: 40,
+      &quot;x&quot;: 0.3318,
+      &quot;y&quot;: 0.7469,
+      &quot;headingDeg&quot;: 60,
+      &quot;length&quot;: 1.778,
+      &quot;width&quot;: 0.685
+    }
+  ],
+  &quot;lot&quot;: {
+    &quot;rect&quot;: [
+      0,
+      0.425,
+      1,
+      0.8417
+    ]
+  },
+  &quot;road&quot;: {
+    &quot;laneV&quot;: 0.4167,
+    &quot;departLaneV&quot;: 0.4278,
+    &quot;topV&quot;: 0.3125,
+    &quot;bottomV&quot;: 0.4417,
+    &quot;exitEdge&quot;: &quot;left&quot;
+  },
+  &quot;slots&quot;: {
+    &quot;count&quot;: 4,
+    &quot;lockedCount&quot;: 3,
+    &quot;tiltDeg&quot;: 15,
+    &quot;parkedHeadingDeg&quot;: -75,
+    &quot;centers&quot;: [
+      [
+        0.2516,
+        0.375
+      ],
+      [
+        0.3459,
+        0.375
+      ],
+      [
+        0.4371,
+        0.375
+      ],
+      [
+        0.5283,
+        0.375
+      ]
+    ],
+    &quot;locked&quot;: [
+      [
+        0.6195,
+        0.375
+      ],
+      [
+        0.7107,
+        0.375
+      ],
+      [
+        0.8019,
+        0.375
+      ]
+    ],
+    &quot;size&quot;: [
+      0.623,
+      1.444
+    ],
+    &quot;counterOffsetV&quot;: -0.0111
+  },
+  &quot;hud&quot;: {
+    &quot;speedPill&quot;: {
+      &quot;u&quot;: 0.9026,
+      &quot;v&quot;: 0.306,
+      &quot;w&quot;: 0.177,
+      &quot;h&quot;: 0.037
+    },
+    &quot;caption&quot;: {
+      &quot;u&quot;: 0.5,
+      &quot;v&quot;: 0.06
+    }
+  },
+  &quot;bushes&quot;: [
+    [
+      0.1101,
+      0.2639
+    ],
+    [
+      0.8899,
+      0.2639
+    ]
+  ],
+  &quot;speedPill&quot;: {
+    &quot;initial&quot;: 1,
+    &quot;multipliers&quot;: {
+      &quot;1&quot;: 1,
+      &quot;2&quot;: 1.93,
+      &quot;3&quot;: 2.78
+    },
+    &quot;holdToTripleSeconds&quot;: 0.25
+  },
+  &quot;crowd&quot;: {
+    &quot;rowSize&quot;: 4,
+    &quot;rowPitchUnits&quot;: 0.2586,
+    &quot;speedUnitsPerSec&quot;: 0.9815,
+    &quot;ring&quot;: {
+      &quot;path&quot;: [
+        [
+          0.5157,
+          0.2917
+        ],
+        [
+          0.4843,
+          0.2919
+        ],
+        [
+          0.453,
+          0.2924
+        ],
+        [
+          0.4216,
+          0.2927
+        ],
+        [
+          0.3902,
+          0.2926
+        ],
+        [
+          0.359,
+          0.2913
+        ],
+        [
+          0.3282,
+          0.289
+        ],
+        [
+          0.3021,
+          0.2826
+        ],
+        [
+          0.29,
+          0.2714
+        ],
+        [
+          0.2842,
+          0.2594
+        ],
+        [
+          0.2811,
+          0.2472
+        ],
+        [
+          0.2829,
+          0.235
+        ],
+        [
+          0.2891,
+          0.223
+        ],
+        [
+          0.3017,
+          0.2119
+        ],
+        [
+          0.3281,
+          0.2057
+        ],
+        [
+          0.359,
+          0.2036
+        ],
+        [
+          0.3902,
+          0.2024
+        ],
+        [
+          0.4216,
+          0.2023
+        ],
+        [
+          0.4529,
+          0.2026
+        ],
+        [
+          0.4843,
+          0.203
+        ],
+        [
+          0.5157,
+          0.2032
+        ],
+        [
+          0.5471,
+          0.203
+        ],
+        [
+          0.5785,
+          0.2026
+        ],
+        [
+          0.6098,
+          0.2023
+        ],
+        [
+          0.6412,
+          0.2024
+        ],
+        [
+          0.6724,
+          0.2036
+        ],
+        [
+          0.7033,
+          0.2057
+        ],
+        [
+          0.7297,
+          0.2119
+        ],
+        [
+          0.7423,
+          0.223
+        ],
+        [
+          0.7485,
+          0.235
+        ],
+        [
+          0.7503,
+          0.2472
+        ],
+        [
+          0.7472,
+          0.2594
+        ],
+        [
+          0.7414,
+          0.2714
+        ],
+        [
+          0.7293,
+          0.2826
+        ],
+        [
+          0.7032,
+          0.289
+        ],
+        [
+          0.6724,
+          0.2913
+        ],
+        [
+          0.6412,
+          0.2926
+        ],
+        [
+          0.6098,
+          0.2927
+        ],
+        [
+          0.5784,
+          0.2924
+        ],
+        [
+          0.5471,
+          0.2919
+        ]
+      ],
+      &quot;closed&quot;: true,
+      &quot;exitIndex&quot;: 0,
+      &quot;direction&quot;: &quot;clockwise&quot;,
+      &quot;rows&quot;: [
+        [
+          &quot;blue&quot;,
+          3
+        ],
+        [
+          &quot;green&quot;,
+          1
+        ],
+        [
+          &quot;blue&quot;,
+          5
+        ],
+        [
+          &quot;purple&quot;,
+          1
+        ],
+        [
+          &quot;green&quot;,
+          1
+        ],
+        [
+          &quot;blue&quot;,
+          1
+        ],
+        [
+          &quot;purple&quot;,
+          2
+        ],
+        [
+          &quot;blue&quot;,
+          1
+        ],
+        [
+          &quot;purple&quot;,
+          6
+        ],
+        [
+          &quot;red&quot;,
+          2
+        ],
+        [
+          &quot;purple&quot;,
+          1
+        ],
+        [
+          &quot;red&quot;,
+          1
+        ],
+        [
+          &quot;blue&quot;,
+          3
+        ],
+        [
+          &quot;green&quot;,
+          4
+        ],
+        [
+          &quot;red&quot;,
+          10
+        ],
+        [
+          &quot;blue&quot;,
+          1
+        ],
+        [
+          &quot;red&quot;,
+          1
+        ]
+      ],
+      &quot;phaseOffsetUnits&quot;: -0.1093,
+      &quot;junctions&quot;: {
+        &quot;left&quot;: [
+          0.3008,
+          0.2127
+        ],
+        &quot;right&quot;: [
+          0.7306,
+          0.2127
+        ]
+      }
+    },
+    &quot;feeders&quot;: [
+      {
+        &quot;id&quot;: &quot;left&quot;,
+        &quot;junction&quot;: &quot;left&quot;,
+        &quot;path&quot;: [
+          [
+            0.0957,
+            0.0232
+          ],
+          [
+            0.0954,
+            0.0389
+          ],
+          [
+            0.095,
+            0.0546
+          ],
+          [
+            0.0949,
+            0.0703
+          ],
+          [
+            0.096,
+            0.0859
+          ],
+          [
+            0.0974,
+            0.1016
+          ],
+          [
+            0.1,
+            0.1173
+          ],
+          [
+            0.1055,
+            0.1328
+          ],
+          [
+            0.1149,
+            0.1481
+          ],
+          [
+            0.1286,
+            0.1628
+          ],
+          [
+            0.1491,
+            0.1763
+          ],
+          [
+            0.1759,
+            0.1879
+          ],
+          [
+            0.2091,
+            0.1967
+          ],
+          [
+            0.3008,
+            0.2127
+          ]
+        ],
+        &quot;rows&quot;: [
+          [
+            &quot;blue&quot;,
+            8
+          ],
+          [
+            &quot;yellow&quot;,
+            1
+          ],
+          [
+            &quot;green&quot;,
+            1
+          ],
+          [
+            &quot;blue&quot;,
+            1
+          ],
+          [
+            &quot;green&quot;,
+            1
+          ],
+          [
+            &quot;yellow&quot;,
+            1
+          ],
+          [
+            &quot;green&quot;,
+            4
+          ],
+          [
+            &quot;yellow&quot;,
+            2
+          ],
+          [
+            &quot;blue&quot;,
+            2
+          ],
+          [
+            &quot;green&quot;,
+            2
+          ]
+        ]
+      },
+      {
+        &quot;id&quot;: &quot;right&quot;,
+        &quot;junction&quot;: &quot;right&quot;,
+        &quot;path&quot;: [
+          [
+            0.9357,
+            0.0232
+          ],
+          [
+            0.936,
+            0.0389
+          ],
+          [
+            0.9364,
+            0.0546
+          ],
+          [
+            0.9365,
+            0.0703
+          ],
+          [
+            0.9354,
+            0.0859
+          ],
+          [
+            0.934,
+            0.1016
+          ],
+          [
+            0.9314,
+            0.1173
+          ],
+          [
+            0.9259,
+            0.1328
+          ],
+          [
+            0.9165,
+            0.1481
+          ],
+          [
+            0.9028,
+            0.1628
+          ],
+          [
+            0.8823,
+            0.1763
+          ],
+          [
+            0.8555,
+            0.1879
+          ],
+          [
+            0.8223,
+            0.1967
+          ],
+          [
+            0.7306,
+            0.2127
+          ]
+        ],
+        &quot;rows&quot;: [
+          [
+            &quot;blue&quot;,
+            1
+          ],
+          [
+            &quot;yellow&quot;,
+            1
+          ],
+          [
+            &quot;blue&quot;,
+            2
+          ],
+          [
+            &quot;purple&quot;,
+            1
+          ],
+          [
+            &quot;yellow&quot;,
+            5
+          ],
+          [
+            &quot;purple&quot;,
+            3
+          ]
+        ]
+      }
+    ],
+    &quot;exit&quot;: {
+      &quot;u&quot;: 0.5157,
+      &quot;v&quot;: 0.2917
+    }
+  },
+  &quot;timing&quot;: {
+    &quot;vehicleSpeedUnitsPerSec&quot;: 17.222,
+    &quot;exitSpeedUnitsPerSec&quot;: 21,
+    &quot;laneSpeedUnitsPerSec&quot;: 15,
+    &quot;parkSeconds&quot;: 0.2,
+    &quot;reverseOutSeconds&quot;: 0.4,
+    &quot;reverseOutUnits&quot;: 1.245,
+    &quot;departSpeedUnitsPerSec&quot;: 14.444,
+    &quot;bumpSpeedUnitsPerSec&quot;: 17.222,
+    &quot;bumpFlashSeconds&quot;: 0.07,
+    &quot;bumpBurstSeconds&quot;: 0.35,
+    &quot;slotsFullPopupSeconds&quot;: 0.6,
+    &quot;slotsFullFadeSeconds&quot;: 0.1,
+    &quot;slotBlinkPeriod&quot;: 1,
+    &quot;slotBlinkOn&quot;: 0.3,
+    &quot;winDelayAfterLastDeparture&quot;: 1.56,
+    &quot;flashToConfetti&quot;: 0.04,
+    &quot;confettiSeconds&quot;: 0.3
+  },
+  &quot;timeLimitSeconds&quot;: 90,
+  &quot;mystery&quot;: [],
+  &quot;solution&quot;: {
+    &quot;order&quot;: [
+      &quot;V01&quot;,
+      &quot;V04&quot;,
+      &quot;V07&quot;,
+      &quot;V10&quot;,
+      &quot;V02&quot;,
+      &quot;V05&quot;,
+      &quot;V08&quot;,
+      &quot;V11&quot;,
+      &quot;V03&quot;,
+      &quot;V06&quot;,
+      &quot;V09&quot;
+    ],
+    &quot;seconds&quot;: 24.2
+  }
+}</pre><h3>Level fields</h3><table><tr><th>Field</th><th>JSON type</th></tr><tr><td>schemaVersion</td><td>int</td></tr><tr><td>id</td><td>str</td></tr><tr><td>number</td><td>int</td></tr><tr><td>caption</td><td>str</td></tr><tr><td>design</td><td>dict</td></tr><tr><td>generator</td><td>dict</td></tr><tr><td>vehicles</td><td>list</td></tr><tr><td>lot</td><td>dict</td></tr><tr><td>road</td><td>dict</td></tr><tr><td>slots</td><td>dict</td></tr><tr><td>hud</td><td>dict</td></tr><tr><td>bushes</td><td>list</td></tr><tr><td>speedPill</td><td>dict</td></tr><tr><td>crowd</td><td>dict</td></tr><tr><td>timing</td><td>dict</td></tr><tr><td>timeLimitSeconds</td><td>int</td></tr><tr><td>mystery</td><td>list</td></tr><tr><td>solution</td><td>dict</td></tr></table><h3>Safe worked editing procedure</h3><ol><li>Open Level 4 in the Level Editor and duplicate it into an unused slot.</li><li>Use the editor’s supported controls for a small placement change; keep legal occupancy and required targets. Do not invent JSON fields.</li><li>Run the shipped validator, correct any rule errors, save, then open the duplicate in gameplay and complete it.</li><li>For generation, record the current seed, request a small append batch using the exposed controls, validate its solutions and confirm the previous campaign prefix is unchanged. Cancelling must leave the campaign unchanged.</li></ol><p>Run these procedures in a clean import of the final candidate before claiming buyer acceptance; restore test additions afterward.</p><h3>Current booster policy</h3><pre>{
+  &quot;schemaVersion&quot;: 1,
+  &quot;game&quot;: &quot;buscrowd&quot;,
+  &quot;profile&quot;: &quot;local&quot;,
+  &quot;campaignLevels&quot;: 500,
+  &quot;initialGrant&quot;: 2,
+  &quot;refillAmount&quot;: 1,
+  &quot;baseCoinCost&quot;: 100,
+  &quot;coinCostStep&quot;: 25,
+  &quot;levelsPerPriceStep&quot;: 10,
+  &quot;boosters&quot;: [
+    {
+      &quot;id&quot;: &quot;buscrowd_crowd_shuffle&quot;,
+      &quot;unlockLevel&quot;: 2,
+      &quot;rewardedPlacement&quot;: &quot;booster_refill_buscrowd_crowd_shuffle&quot;,
+      &quot;baseCoinCost&quot;: 0,
+      &quot;coinCostStep&quot;: 0,
+      &quot;reason&quot;: &quot;Default first slot. No target to pick: one tap trades waiting rows so they match parked buses, the easiest booster to teach.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;buscrowd_balloon&quot;,
+      &quot;unlockLevel&quot;: 7,
+      &quot;rewardedPlacement&quot;: &quot;booster_refill_buscrowd_balloon&quot;,
+      &quot;baseCoinCost&quot;: 0,
+      &quot;coinCostStep&quot;: 0,
+      &quot;reason&quot;: &quot;Default second slot. The first targeted booster (pick a blocked bus and lift it into a free bay) once the bar is familiar.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;buscrowd_bus_shuffle&quot;,
+      &quot;unlockLevel&quot;: 12,
+      &quot;rewardedPlacement&quot;: &quot;booster_refill_buscrowd_bus_shuffle&quot;,
+      &quot;baseCoinCost&quot;: 0,
+      &quot;coinCostStep&quot;: 0,
+      &quot;reason&quot;: &quot;Default third slot. Swaps equal-size buses across the depot; most useful once boards are dense enough to have several.&quot;
+    }
+  ]
+}</pre><p>Hosting, native-device tests and live-service verification are separately recorded in the delivery handoff. A local build is not proof of a hosted release.</p></section><section id="default-font-policy"><h2>Fonts</h2><p>Unity-provided defaults only: TextMesh Pro default font for TMP text and LegacyRuntime.ttf for legacy Unity UI. Official TMP Essentials must be installed. Do not add custom font files or atlases. Any historical custom-font references above describe an older revision; they are not current dependencies.</p></section><section id="publishing-2026-10-09"><h2>Demo and publishing configuration</h2><p>Current source verified on 2026-10-09. The Android download is a development demo with debug signing; WebGL is a LocalQA showcase. Ads are included as LiveOps provider adapters and test/local configuration; vendor SDKs and production credentials are not bundled in the buyer package. Native device and live store certification remain pending.</p><p>For product help, contact SatisVizion at satisvizion@gmail.com</p><p>See Third-Party Notices.txt in the package for the verified dependency and license inventory.</p><p><a href="https://satisvizion.github.io/Documentations/bus-crowd/HyperCasualLiveOpsKit.html">HyperCasual LiveOps Kit manual</a></p></section></main></body></html>
