@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Block Loop Shooter — Buyer Guide</title>
+<style>body{margin:0;background:#101723;color:#e6edf7;font:16px/1.65 system-ui,sans-serif}header,main,nav{max-width:1040px;margin:auto;padding:24px}header{padding-bottom:0}h1{font-size:38px;line-height:1.2}h2{color:#8fded1}h3{color:#cfe3ff}nav{display:flex;flex-wrap:wrap;gap:10px 24px;border-bottom:1px solid #354456}a{color:#a8c8ff}section{padding:12px 0 24px;scroll-margin-top:20px}code,pre{background:#1d2939;border-radius:6px}code{padding:2px 5px;overflow-wrap:anywhere}pre{padding:16px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px}aside{border-left:4px solid #e4b668;padding:14px;background:#29251f}.wrap{overflow-x:auto}table{border-collapse:collapse;width:100%}td,th{text-align:left;vertical-align:top;border-bottom:1px solid #354456;padding:10px}ol li,ul li{margin:4px 0}@media(max-width:600px){header,main,nav{padding:16px}h1{font-size:30px}td,th{padding:6px}}</style>
+</head>
+<body>
+<header>
+<h1>Block Loop Shooter — Buyer Guide</h1>
+<p>Unity 6000.0.62f1 · Universal Render Pipeline 17.0.4 · version 3</p>
+<aside>Desktop gameplay, the clean import of this package, the level editor and the generator have been exercised on Windows. Android device acceptance and live ad and purchase providers remain open (see <a href="#limitations">Limitations</a>). This is not a production release certification.</aside>
+</header>
+<nav>
+<a href="#overview">Overview</a>
+<a href="#getting-started">Getting Started</a>
+<a href="#folders">Folder Structure</a>
+<a href="#gameplay">Gameplay</a>
+<a href="#campaign">Campaign</a>
+<a href="#boosters">Boosters</a>
+<a href="#economy">Coins and Saves</a>
+<a href="#scripts">Scripts Reference</a>
+<a href="#editor">Level Editor</a>
+<a href="#worked-example">Worked Example</a>
+<a href="#generator">Auto Level Generator</a>
+<a href="#format">Level Format</a>
+<a href="#customization">Customization</a>
+<a href="#limitations">Limitations</a>
+<a href="#disclosure">AI Disclosure</a>
+<a href="#support">Support</a>
+<a href="#legal">Licences and Notices</a>
+</nav>
+<main>
+<section id="overview">
+<h2>Overview</h2>
+<p>Block Loop Shooter is a portrait puzzle game. A train of coloured blocks runs around a closed loop. The player sends shooters from a pit to four pads in front of the loop; each shooter fires at the blocks of its own colour as they pass. Clear every block to win; let every pad fill with shooters that can no longer hit anything and the attempt is lost.</p>
+<p>The package contains the playable game with 500 levels, three boosters (Swap, Pad +, Burst), a visual level editor and a seeded level generator, and the HyperCasualLiveOpsKit shell (menu, results, coins, shop, booster bar and refill offer). The first level and level 200 are the two authored levels of the campaign, written directly as level files; the other 498 levels were made by the generator that ships in this package.</p>
+</section>
+
+<section id="getting-started">
+<h2>Getting Started</h2>
+<h3>Requirements</h3>
+<ul>
+<li>Unity <strong>6000.0.62f1</strong> (Unity 6). Other versions were not tested.</li>
+<li>Packages: Universal RP <code>com.unity.render-pipelines.universal</code> 17.0.4, Input System <code>com.unity.inputsystem</code> 1.14.2, Unity UI <code>com.unity.ugui</code> 2.0.0 (it carries TextMesh Pro), and the built-in modules of a Universal 3D project.</li>
+<li>TMP Essential Resources (<code>Window → TextMeshPro → Import TMP Essential Resources</code>). The game uses Unity's default fonts only: the TMP default font asset and the built-in <code>LegacyRuntime.ttf</code>. No font file ships in this package.</li>
+</ul>
+<h3>Import into a new project</h3>
+<ol>
+<li>Create a new <strong>Universal 3D</strong> project in Unity 6000.0.62f1 and install the three packages above at those versions (<code>Window → Package Manager</code>).</li>
+<li>Import TMP Essential Resources and keep their default location <code>Assets/TextMesh Pro</code>.</li>
+<li>Import <code>Block-Loop-Shooter-v3.unitypackage</code> (<code>Assets → Import Package → Custom Package</code>, import everything). It creates exactly two folders: <code>Assets/Game</code> and <code>Assets/HyperCasualLiveOpsKit</code>. Wait for compilation to finish.</li>
+<li><code>Edit → Project Settings → Player → Other Settings → Active Input Handling</code>: <strong>Input System Package (New)</strong> or <strong>Both</strong>.</li>
+<li><code>Edit → Project Settings → Graphics</code>: set the Default Render Pipeline to <code>Assets/Game/ProjectRenderSettings/PC_RPAsset.asset</code>. In <code>Quality</code>, set the same asset as the Render Pipeline Asset of every quality level you use. Keep the Color Space on <strong>Linear</strong> (<code>Player → Other Settings</code>).</li>
+<li><code>File → Build Profiles</code> (Build Settings): add <code>Assets/HyperCasualLiveOpsKit/StarterMenu/Scenes/HLK_MainMenu.unity</code> first and <code>Assets/Game/Scenes/Game.unity</code> second. The menu scene opens the gameplay scene by its name <code>Game</code>.</li>
+<li>Open <code>HLK_MainMenu.unity</code> and press Play. Close the welcome card, press <strong>PLAY</strong>: level 1 opens with a short lesson.</li>
+</ol>
+<p>A unitypackage carries assets only, never Project Settings: steps 4 to 6 are yours to make in every new project. The clean-import test of this package made the same settings in a new empty project (only the three packages and Unity's built-in modules, TMP Essentials, then this package), built a Windows development player from the two scenes and played it from the menu.</p>
+<h3>Editor menu</h3>
+<div class="wrap"><table>
+<tr><th>Menu</th><th>What it does</th></tr>
+<tr><td><code>Tools → Block Loop Shooter → Documentation</code></td><td>Opens this file (<code>Assets/Game/Documentation/Documentation.html</code>) in your browser.</td></tr>
+<tr><td><code>Tools → Block Loop Shooter → Level Editor</code></td><td>Opens the level window on the saved campaign (<a href="#editor">Level Editor</a>).</td></tr>
+<tr><td><code>Tools → Block Loop Shooter → Auto Level Generator</code></td><td>Opens the same window; the generator is its lower half (<a href="#generator">Auto Level Generator</a>).</td></tr>
+</table></div>
+</section>
+
+<section id="folders">
+<h2>Folder Structure</h2>
+<pre>Assets/Game/
+  AI-DISCLOSURE.txt              list of AI-generated and AI-assisted files
+  Documentation/Documentation.html   this guide
+  Campaign/Resources/Levels/     the campaign: Level_1.json ... Level_500.json + CampaignAuthoring.json   (written by the level tools)
+  Resources/Levels/              level-1.json, level-200.json: the two authored levels (the generator reads them)
+  Resources/Art/                 HUD and effect sprites of the game
+  Resources/Materials/           game materials (shaders in Assets/Game/Shaders)
+  Resources/Models/registry.json the model registry (procedural default set and two generated alternate sets)
+  Resources/NativeModels/        the two generated alternate model sets as Unity prefabs, meshes, materials, textures
+  Scenes/Game.unity              the gameplay scene
+  Scripts/Core/                  rules: level data, simulation (pure C#)
+  Scripts/Game/, Scripts/UI/, Scripts/Models/   presentation: board, camera fit, HUD, effects, models
+  Integration/                   the connection to HyperCasualLiveOpsKit (bridge, booster adapter, campaign catalogue, lesson caption)
+  Integration/PowerUps/          the three booster definitions (blockloop_swap, blockloop_pad, blockloop_burst)
+  Integration/Resources/HLK/BoosterProgression.json   unlock levels, free charges and refill prices
+  UI/Boosters/Icons/, UI/Boosters/Tutorials/          booster icons and first-use pictures
+  LevelTools/Editor/             the game's level editor adapter and generator (editor only)
+  ProductionLevelTools/Editor/   the shared level window, campaign store and validation (editor only)
+  ProjectRenderSettings/         URP pipeline assets, renderers and volume profiles
+Assets/HyperCasualLiveOpsKit/    the shell: menu, results, coins, shop, ads and purchase interfaces, booster bar (own guide inside)</pre>
+<p><strong>Editable by you:</strong> everything under <code>Assets/Game</code>. <strong>Written by tools:</strong> <code>Campaign/Resources/Levels</code> is owned by the level tools; edit levels through the level window so that every file is validated and <code>CampaignAuthoring.json</code> stays in step (a level file changed by hand is refused at the next save until you reload). <strong>Do not move</strong> <code>Assets/Game/Resources/Levels</code>, <code>Assets/Game/Scenes/Game.unity</code> or the <code>Resources</code> folders: the generator and the game find them by these paths and keys.</p>
+</section>
+
+<section id="gameplay">
+<h2>Gameplay</h2>
+<ul>
+<li><strong>The loop.</strong> A rigid train of rows, five blocks wide, moves around the loop at the level's speed. The straight bottom part in front of the pads is the firing stretch.</li>
+<li><strong>Sending a shooter.</strong> Tap a shooter in the pit. A shooter can leave when empty cells connect it to the top of the pit; it jumps to the leftmost free pad. Tapping a shooter that is still enclosed only makes it nudge. When all pads are busy, hold the press: the shooter leaves as soon as a pad frees; releasing first cancels it.</li>
+<li><strong>Firing.</strong> A shooter on a pad fires at the frontmost block of its colour inside the firing stretch, one block per shot, 100 shots per shooter (20 rows of five blocks). Empty, it leaves and frees its pad. When several shooters of one colour are parked, only the leftmost fires.</li>
+<li><strong>Hidden shooters</strong> show a question mark until they are uncovered; their colour is revealed when empty cells connect them to the top of the pit.</li>
+<li><strong>Dispenser boxes</strong> hold a queue of shooters and release the next one into the cell on their open side whenever that cell is empty.</li>
+<li><strong>Feeder lanes</strong> carry rows of blocks that drop into the loop: a row passing the lane's junction takes the lane's next row when it is completely empty.</li>
+<li><strong>End game.</strong> From level 4 on (level 200 included), the train speeds up once the pit has no shooter left.</li>
+<li><strong>Win.</strong> Every block on the loop and in the feeder lanes is cleared and every shooter has left. The kit's win card opens and 50 coins are credited once.</li>
+<li><strong>Loss.</strong> With every pad occupied, a full lap with no shot and no row fed ends the attempt; so does a jam: every pad occupied for two laps (plus one second) with fewer than 1.5 blocks shot per second. The kit's lose card offers <strong>TRY AGAIN</strong>, which loads a fresh board of the same level (a mock interstitial ad may show first in the LocalQA profile). A loss costs nothing and earns nothing.</li>
+<li><strong>Lesson.</strong> Level 1 shows a tutorial hand and one sentence; a booster's first use shows its explanation card once.</li>
+</ul>
+</section>
+
+<section id="campaign">
+<h2>Campaign</h2>
+<p>500 levels in seven chapters starting at levels 1, 21, 61, 121, 201, 301 and 401. Each level combines a loop silhouette (square, stadium, arch, oval, heart, horseshoe, bell and others), zero to two feeder lanes and a pit outline, and introduces its mechanics in order: the first feeder lane on level 3, two feeder lanes on level 8, hidden shooters on level 10, the first dispenser box on level 16. Later chapters raise the number of cells, colours, hidden shooters and boxes; recovery levels in between are easier. The first level and level 200 are authored levels.</p>
+<p>Every level file stores a winning tap list (its <em>witness</em>; the two authored levels keep theirs in <code>CampaignAuthoring.json</code>). The editor and the generator refuse to save a level whose witness does not win on the game's own simulation, both as the game runs it and as the kit shell builds it.</p>
+</section>
+
+<section id="boosters">
+<h2>Boosters</h2>
+<div class="wrap"><table>
+<tr><th>Booster</th><th>Unlocks</th><th>Effect (the first-use card's text)</th><th>Refused free when</th></tr>
+<tr><td><strong>SWAP</strong><br><code>blockloop_swap</code></td><td>level 2</td><td>"Upright shooters in the pit trade cells, so a different one sits above each buried shooter. Use it before pads fill." A dispenser box can also show a different shooter at its front.</td><td>the swap would leave the pit looking the same</td></tr>
+<tr><td><strong>PAD +</strong><br><code>blockloop_pad</code></td><td>level 7</td><td>"Opens one more pad for this attempt, so one more shooter can fire. It closes again when the level restarts."</td><td>the extra pad is already open in this attempt</td></tr>
+<tr><td><strong>BURST</strong><br><code>blockloop_burst</code></td><td>level 12</td><td>"The parked shooter with the most shots left fires them all at once. Its pad is free again." It hits its blocks anywhere on the loop, nearest the firing stretch first, then whole rows of its colour still waiting in the feeder lanes.</td><td>no parked shooter has a block to take</td></tr>
+</table></div>
+<ul>
+<li><strong>Free charges:</strong> each booster gives <strong>two charges once</strong>, when the level that unlocks it is first reached by winning the level before it. Winning a level never grants a charge; a refused use costs nothing.</li>
+<li><strong>Refill:</strong> pressing a booster with no charge opens the refill offer. <strong>BUY +1</strong> costs <code>100 + 25 × floor((level − 1) / 10)</code> coins: 100 coins on levels 1 to 10, 125 on 11 to 20, 150 on 21 to 30, and so on up to 1325 on level 500. <strong>WATCH AD +1</strong> grants one charge after a completed rewarded ad (a skipped ad grants nothing; the offer waits up to 90 seconds for the ad). Close grants and costs nothing.</li>
+<li><strong>Shipped configuration:</strong> <code>Assets/Game/Integration/Resources/HLK/BoosterProgression.json</code>: <code>initialGrant</code> 2, <code>refillAmount</code> 1, <code>baseCoinCost</code> 100, <code>coinCostStep</code> 25, <code>levelsPerPriceStep</code> 10, <code>rewardedTimeoutSeconds</code> 90, unlock levels 2, 7 and 12. The definitions in <code>Assets/Game/Integration/PowerUps</code> carry the same unlocks as zero-based level indexes (<code>UnlockLevel</code> 1, 6 and 11) and <code>StartingCount</code> 2; change both places together. The <code>decision</code> and <code>reason</code> texts in the JSON are notes; the game does not read them.</li>
+</ul>
+</section>
+
+<section id="economy">
+<h2>Coins and Saves</h2>
+<p>A win credits 50 coins (<code>WinCoinReward</code> in <code>Assets/HyperCasualLiveOpsKit/StarterMenu/Resources/HLK/StarterMenuConfig.asset</code>). Progress (completed levels), coins and booster charges are saved locally by the kit (Unity PlayerPrefs, under your Player Settings company and product name) and survive a restart; the menu's PLAY opens the next unfinished level. Opening a level by number (the DEV level picker of development builds) does not change saved progress. The shop, wheel, chests, quests and other kit screens are described in the kit's own guide (<code>Assets/HyperCasualLiveOpsKit/Documentation/Documentation.html</code>).</p>
+</section>
+
+<section id="scripts">
+<h2>Scripts Reference</h2>
+<div class="wrap"><table>
+<tr><th>Type (assembly)</th><th>Responsibility</th></tr>
+<tr><td><code>BlockLoop.Core.LevelData</code>, <code>Sim</code> (BlockLoop.Runtime)</td><td>Reads a level JSON; the deterministic simulation in 10 ms steps: train, feeders, presses, shooters, boxes, boosters, win and loss.</td></tr>
+<tr><td><code>BlockLoop.Game.GameController</code></td><td>The gameplay scene's driver: loads the level, steps the simulation, forwards input, applies boosters.</td></tr>
+<tr><td><code>WorldView</code>, <code>Viewport</code>, <code>FxView</code>, <code>TrackMesh</code>, <code>MeshFactory</code>, <code>GameAssets</code></td><td>The board's 3D presentation, the portrait camera fit above the booster shelf, effects and generated meshes and masks.</td></tr>
+<tr><td><code>HudView</code></td><td>The game's own HUD; hidden while the kit shell runs the level.</td></tr>
+<tr><td><code>ModelLibrary</code>, <code>ProceduralModels</code></td><td>The model registry: the procedural set (default) and the two generated alternate sets.</td></tr>
+<tr><td><code>BlockLoop.Integration.BlockLoopHlkBridge</code> (BlockLoop.HLK)</td><td>Connects a level to the kit shell: level number, win and loss, coins, results, settings and pointer blocking.</td></tr>
+<tr><td><code>BlockLoopPowerUpAdapter</code>, <code>BlockLoopBoosterPolicy</code></td><td>The three boosters on the kit's booster bar and the unlock and refill policy.</td></tr>
+<tr><td><code>BlockLoopCampaign</code></td><td>The runtime level catalogue: <code>Resources.Load("Levels/Level_" + n)</code>.</td></tr>
+<tr><td><code>BlockLoopLessonCaption</code></td><td>The level 1 lesson sentence.</td></tr>
+<tr><td><code>BlockLoop.LevelTools.GameAdapter</code> (editor)</td><td>The game's adapter for the shared level window: canvas, validation, witness replay, generation, Play saved level.</td></tr>
+<tr><td><code>BlockLoopMenu</code>, <code>BlockLoopWitness</code> (editor)</td><td>The three menu entries; Rebuild + find witness.</td></tr>
+<tr><td><code>BlockLoop.LevelTools.Gen.Schedule</code>, <code>LevelBuilder</code>, <code>LevelFile</code>, <code>Solver</code>, <code>Rules</code> (editor)</td><td>The 500-level plan, drafting a level from its plan row, layout ↔ level JSON, the simulated players, the level rules.</td></tr>
+<tr><td><code>Production.LevelTools.LevelToolsWindow</code>, <code>Campaign</code>, <code>CampaignStore</code> (editor)</td><td>The window, campaign-wide validation and the transactional save of the level folder.</td></tr>
+</table></div>
+</section>
+
+<section id="editor">
+<h2>Level Editor</h2>
+<p><code>Tools → Block Loop Shooter → Level Editor</code> opens the window <em>BlockLoop Levels</em> on the saved campaign (found by its <code>CampaignAuthoring.json</code>).</p>
+<ul>
+<li><strong>Top row:</strong> <em>Undo</em> (also Ctrl+Z, 64 steps), <em>Reload</em> (discards unsaved edits), <em>Validate + save</em>.</li>
+<li><strong>Left list:</strong> Level 1 to Level 500. <strong>Level buttons:</strong> <em>Duplicate</em>, <em>Delete</em>, <em>Up</em>, <em>Down</em> (levels are renumbered).</li>
+<li><strong>Canvas:</strong> the loop (white), feeder lanes, pads (circles) and the pit cells in their colours; <code>?</code> marks a hidden shooter, <code>&lt;3</code> or <code>&gt;3</code> a box with its direction and queue length. Drag a yellow handle to move a control point of the loop: every runtime field is rebuilt from the layout and the witness is cleared. <em>Rebuild + find witness</em> (lower left) derives the level from its layout block again and searches a winning tap list with the game's simulation. The two authored levels (the first level and level 200) are shown as text only.</li>
+<li><strong>Exact game data:</strong> the level's JSON. <em>Apply data edit (invalidates witness)</em> takes your text; <em>Validate selected</em> checks the level rules and replays the witness; <em>Play saved level</em> opens <code>Game.unity</code> on that level in Play mode (save first).</li>
+</ul>
+<p><strong>Saving:</strong> <em>Validate + save</em> checks the whole campaign (count equal to the saved request, contiguous numbering, every level's rules and witness on both simulations, no duplicate puzzle, no more than two equal formations in a row, at least the minimum number of formations, the chapter plan) and only then replaces <code>Assets/Game/Campaign/Resources/Levels</code> in one step. A failed check changes no file and shows the reason. The previous folder is kept as a backup in <code>LevelToolBackups</code> of your project (outside Assets) and the request in <code>ProjectSettings/LevelTools/BlockLoop.json</code>. Checking all 500 levels takes about two minutes on a desktop CPU.</p>
+</section>
+
+<section id="worked-example">
+<h2>Worked Example: edit, validate, save, play</h2>
+<p>Make the loop of level 3 lower by one row of the world grid. This exact edit was made in a new project with this package and checked as described.</p>
+<ol>
+<li>Open <code>Tools → Block Loop Shooter → Level Editor</code> and select <strong>Level 3</strong> (a stadium loop of 64 rows, one diagonal feeder lane, five shooters).</li>
+<li>In <em>Exact game data</em>, find the layout's control polygon:
+<pre>"control": [[-11.925, 0, 6.615], [11.925, 0, 6.615], [11.925, 13.5, 6.615], [-11.925, 13.5, 6.615]],</pre>
+and change the two top points from <code>13.5</code> to <code>12.5</code>:
+<pre>"control": [[-11.925, 0, 6.615], [11.925, 0, 6.615], [11.925, 12.5, 6.615], [-11.925, 12.5, 6.615]],</pre></li>
+<li>Press <em>Apply data edit (invalidates witness)</em>. The canvas says the level has no witness and cannot be saved.</li>
+<li>Press <em>Rebuild + find witness</em>. The level is rebuilt from its layout: the loop now has <strong>62 rows</strong> instead of 64, the extra rows of blocks move to the feeder lane, and a new witness is found: <code>60:1.1 90:1.2 120:1.3 150:2.2 1101:2.3</code> (five taps; each tap is <code>step:row.column</code>, a step being 10 ms).</li>
+<li>Press <em>Validate selected</em>: "Selected level model + witness passed."</li>
+<li>Press <em>Validate + save</em>: <code>Level_3.json</code> and <code>CampaignAuthoring.json</code> are written after the whole campaign passed.</li>
+<li>Press <em>Play saved level</em> (or start from <code>HLK_MainMenu</code>): level 3 runs on the shorter loop. In the clean-import test the saved file was what the game loaded, and the new witness won it on the simulation the kit shell plays.</li>
+<li>To undo the example: <em>Undo</em> before saving, or set the values back to <code>13.5</code>, rebuild, find witness and save again (that test then restored the shipped campaign byte for byte).</li>
+</ol>
+<p>Edits that fail are explained in the status line, for example a loop that leaves the board (rule G15), two stretches closer than one track width (G1), or blocks and shots of a colour that do not match (G8).</p>
+</section>
+
+<section id="generator">
+<h2>Auto Level Generator</h2>
+<p><code>Tools → Block Loop Shooter → Auto Level Generator</code> opens the same window; the generator is the <em>Saved generation request</em> part below the level view.</p>
+<div class="wrap"><table>
+<tr><th>Field</th><th>Shipped value</th><th>Meaning</th></tr>
+<tr><td>Final campaign count</td><td>500</td><td>The total after generation, in both modes.</td></tr>
+<tr><td>Seed</td><td>20261013</td><td>With the count it fixes the plan: which silhouette, pit, colours, feeders, hidden shooters and boxes each level gets. The same seed and count always give the same levels.</td></tr>
+<tr><td>Attempts per level</td><td>40</td><td>Candidates tried per level before the generator gives up and reports the level as unproven (nothing is replaced).</td></tr>
+<tr><td>Minimum structural formations</td><td>80</td><td>Distinct loop / feeder / pit combinations the campaign must contain.</td></tr>
+<tr><td>Maximum repeat streak</td><td>2</td><td>No more than this many levels in a row with the same formation.</td></tr>
+<tr><td>Append to saved campaign</td><td>off</td><td>On: keep every saved level and add levels up to the count. Off: replace the campaign.</td></tr>
+<tr><td>Game rules JSON</td><td>names the two authored levels</td><td>Stored with the campaign; the generator always reads the authored levels from <code>Assets/Game/Resources/Levels</code>.</td></tr>
+</table></div>
+<p><em>Save request</em> stores these values; <em>Generate into editor (review, then save)</em> generates, checks every new level (rules, a winning witness, its difficulty band against seeded random plays) and validates the campaign in memory. Nothing is written until you press <em>Validate + save</em>. <strong>Cancel</strong> on the progress bar stops generation and leaves both the editor's levels and the files unchanged.</p>
+<h3>Example: append two levels</h3>
+<ol>
+<li>Set <em>Final campaign count</em> to <strong>502</strong>, keep <em>Seed</em> 20261013, tick <em>Append to saved campaign</em>.</li>
+<li>Press <em>Generate into editor</em>. This takes under a minute on a desktop CPU (plus about two minutes the first time the window checks all 500 saved levels). Levels 1 to 500 stay exactly as they were. Level 501 is a mushroom loop with two diagonal feeder lanes; level 502 a bell loop with a diagonal and a rail feeder lane; each comes with its own witness.</li>
+<li>Review them on the canvas, then press <em>Validate + save</em>: <code>Level_501.json</code> and <code>Level_502.json</code> are written and the game counts 502 levels. Set <code>VisibleLevelCount</code> in <code>StarterMenuConfig.asset</code> to the new count if the menu should show them.</li>
+</ol>
+<p>The clean-import test generated, validated and saved exactly this append, then saved the shipped 500 levels back. <strong>Replace mode</strong> drafts every level one after another in the window (tens of seconds per level), so regenerating all 500 takes hours; it was not part of the test. The two authored levels (the first level and level 200) are never generated: replace mode keeps their files and finds their witness again.</p>
+</section>
+
+<section id="format">
+<h2>Level Format</h2>
+<p>A level is one JSON file, <code>Assets/Game/Campaign/Resources/Levels/Level_&lt;n&gt;.json</code>, loaded at runtime as <code>Levels/Level_&lt;n&gt;</code>. This is the complete shipped <code>Level_3.json</code> (the long point lists are shortened here with <code>…</code>; the real file has every point):</p>
+<pre>{
+  "id": "level-3",
+  "title": "Level 3",
+  "number": 3,
+  "aspect": 0.56296,
+  "coinsText": "0",
+  "reward": 40,
+  "rewardX2": 80,
+  "newFeature": false,
+  "tutorialText": "",
+  "colours": [{"name": "red", "hex": "#EC1238"}, {"name": "yellow", "hex": "#FFDE28"}, {"name": "green", "hex": "#22C52A"}, {"name": "blue", "hex": "#2464EC"}, {"name": "orange", "hex": "#ED782E"}],
+  "track": {
+    "shape": "stadium",
+    "rows": 64,
+    "lanes": 5,
+    "rowsPerSecond": 3.85852,
+    "stretchEntryU": 56,
+    "stretchRows": 17.0,
+    "fireRate": 40.73333,
+    "fireRampSeconds": 2.42667,
+    "fireRampStart": 0.7,
+    "fireDelay": 0.09833,
+    "cubeRemoveDelay": 0.35,
+    "halfWidth": 0.06822,
+    "centreline": [[0.49725, 0.50658, 0], [0.52332, 0.50658, 1.008], … , [0.48422, 0.50658, 63.496]],
+    "loop": [{"colour": "yellow", "rows": 9}, {"colour": "blue", "rows": 4}, {"colour": "green", "rows": 20}, {"colour": "orange", "rows": 20}, {"colour": "yellow", "rows": 11}],
+    "feeders": [{"id": "TR", "u": 24.69291, "curved": true, "runs": [{"colour": "blue", "rows": 16}, {"colour": "red", "rows": 20}], "path": [[0.68204, 0.35502], [0.68864, 0.3446], … , [0.95529, -0.07638]]}]
+  },
+  "pads": [[0.23, 0.63889], [0.41, 0.63889], [0.59, 0.63889], [0.77, 0.63889]],
+  "padRadius": 0.04934,
+  "pit": {
+    "cols": 3,
+    "rows": 2,
+    "x0": 0.33553,
+    "y0": 0.74537,
+    "dx": 0.16447,
+    "dy": 0.11574,
+    "cells": [{"row": 1, "col": 1, "kind": "shooter", "colour": "yellow"}, {"row": 1, "col": 2, "kind": "shooter", "colour": "green"}, {"row": 1, "col": 3, "kind": "shooter", "colour": "orange"}, {"row": 2, "col": 2, "kind": "shooter", "colour": "blue"}, {"row": 2, "col": 3, "kind": "shooter", "colour": "red"}]
+  },
+  "timing": {"inputFrom": 0.6, "pitSlideStart": 0.1, "pitSlideEnd": 0.35, "padsStart": 0.35, "padsEnd": 0.6, "exitSeconds": 0.45, "jumpMin": 0.07, "jumpMax": 0.2, "padReleaseDelay": 0.1, "boxReleaseDelay": 0.0, "resultDelay": 0.83},
+  "tutorial": {"enabled": false, "at": 0, "row": 0, "col": 0},
+  "endgame": {"speedMultiplier": 1.0, "rampSeconds": 0.15, "praise": false},
+  "nextRect": {"x": 0.3, "y": 0.905, "w": 0.4, "h": 0.07},
+  "layout": {"version": 1, "seed": 14828430738318, "chapter": 1, "role": "normal", "class": "shallow", "silhouette": "stadium", "loopFamily": "ring", "loopSignature": "jjihgffghijjjjihgffghijj", "pitFamily": "small", "pitOutline": "###/.##", "formation": "stadium|diagonal|###/##.",
+    "control": [[-11.925, 0, 6.615], [11.925, 0, 6.615], [11.925, 13.5, 6.615], [-11.925, 13.5, 6.615]],
+    "feeders": [{"side": 1, "kind": "diagonal"}],
+    "stream": "1x20 4x20 2x20 3x20 0x20"},
+  "witness": "60:1.1 90:1.2 120:1.3 150:2.2 963:2.3",
+  "note": "Generated by the Block Loop Shooter level generator (seed 14828430738318); every runtime field is derived from the layout block."
+}</pre>
+<h3>Fields</h3>
+<div class="wrap"><table>
+<tr><th>Field</th><th>Meaning</th></tr>
+<tr><td><code>id</code>, <code>title</code>, <code>number</code></td><td>Identity; <code>number</code> is the level number shown by the shell.</td></tr>
+<tr><td><code>aspect</code></td><td>Width / height of the board the normalised coordinates refer to; the camera fit keeps it visible in any portrait window.</td></tr>
+<tr><td><code>coinsText</code>, <code>reward</code>, <code>rewardX2</code>, <code>newFeature</code>, <code>tutorialText</code>, <code>nextRect</code></td><td>Used only by the game's built-in result screen and HUD. Under the kit shell (the shipped flow) the win reward is <code>WinCoinReward</code> and the kit's cards are shown.</td></tr>
+<tr><td><code>colours</code></td><td>The level's palette: <code>name</code> (referenced everywhere below) and <code>hex</code> colour.</td></tr>
+<tr><td><code>track.shape</code></td><td>Silhouette name (informative).</td></tr>
+<tr><td><code>track.rows</code>, <code>lanes</code></td><td>Rows on the loop and blocks per row (5). <code>loop</code> must add up to <code>rows</code>.</td></tr>
+<tr><td><code>track.rowsPerSecond</code></td><td>Train speed.</td></tr>
+<tr><td><code>track.stretchEntryU</code>, <code>stretchRows</code></td><td>Where the firing stretch starts on the loop (in rows) and how long it is.</td></tr>
+<tr><td><code>track.fireRate</code>, <code>fireRampSeconds</code>, <code>fireRampStart</code>, <code>fireDelay</code>, <code>cubeRemoveDelay</code></td><td>Shots per second, the ramp from <code>fireRampStart</code> × rate to full rate, the delay before a parked shooter's first shot, and how long a hit block stays visible.</td></tr>
+<tr><td><code>track.halfWidth</code>, <code>centreline</code></td><td>Track half width and the loop's centre line: points <code>[x, y, u]</code> in normalised screen coordinates with <code>u</code> the distance along the loop in rows.</td></tr>
+<tr><td><code>track.loop</code></td><td>The blocks on the loop at the start, as runs <code>{"colour", "rows"}</code> from row 0; colour <code>"empty"</code> leaves rows empty.</td></tr>
+<tr><td><code>track.feeders</code></td><td>Feeder lanes: <code>id</code> (<code>TL</code> top left, <code>TR</code> top right), junction <code>u</code> on the loop, <code>runs</code> of rows waiting in the lane (front first), the lane's drawn <code>path</code>.</td></tr>
+<tr><td><code>pads</code>, <code>padRadius</code>, <code>extraPad</code> (optional)</td><td>The four pad centres and their radius. Pad + opens a fifth pad next in the row (or at <code>extraPad</code> when given).</td></tr>
+<tr><td><code>pit.cols</code>, <code>rows</code>, <code>x0</code>, <code>y0</code>, <code>dx</code>, <code>dy</code></td><td>The pit grid: size, centre of cell (row 1, column 1) and the cell pitch. Row 1 is the top (mouth) row.</td></tr>
+<tr><td><code>pit.cells</code></td><td>Occupied cells: <code>kind</code> <code>shooter</code> or <code>hidden</code> with a <code>colour</code> (optional <code>ammo</code>, default 100), or <code>box</code> with <code>dir</code> (−1 releases to the left, 1 to the right) and a <code>queue</code> of colours. Missing cells are empty.</td></tr>
+<tr><td><code>timing</code></td><td>Board entry animation and when input starts (<code>inputFrom</code> seconds), shooter jump and exit times, pad and box release delays, the delay before the result.</td></tr>
+<tr><td><code>tutorial</code></td><td>The built-in tutorial hand (on for the first level only).</td></tr>
+<tr><td><code>endgame</code></td><td>Train speed multiplier, ramp and fire multiplier once the pit is empty; <code>praise</code> shows praise words.</td></tr>
+<tr><td><code>layout</code></td><td>The generator's description the runtime fields are derived from: <code>seed</code>, <code>chapter</code>, <code>role</code>, board <code>class</code>, <code>silhouette</code>, the loop family and signature computed from its shape, pit family and outline, <code>formation</code> key, the loop's <code>control</code> polygon (<code>[x, z, corner radius]</code> in world rows), the <code>feeders</code> (side −1 left / 1 right and kind), and the <code>stream</code> of runs as <code>colourIndex x rows</code>. The game ignores it; the editor rebuilds the level from it.</td></tr>
+<tr><td><code>witness</code></td><td>A winning tap list <code>step:row.column</code> (10 ms steps). The game ignores it; the tools require it.</td></tr>
+<tr><td><code>note</code></td><td>A free note: on generated levels the generator's note with the seed, on the two authored levels a short description. Nothing reads it.</td></tr>
+</table></div>
+<p><code>CampaignAuthoring.json</code> in the same folder lists every level (<code>index</code>, <code>formation</code>, <code>payload</code> = the file's exact text, <code>witness</code>) with the saved request; the tools compare it with the files before every save. The two authored levels are the generator's anchor levels: it plans the campaign around them and never regenerates them, and their <code>formation</code> keys start with <code>anchor-oval</code> (level 1) and <code>anchor-heart</code> (level 200).</p>
+</section>
+
+<section id="customization">
+<h2>Customization</h2>
+<ul>
+<li><strong>Levels:</strong> through the level window only (see above). New colours must be added to a level's <code>colours</code> and used consistently by loop, feeders and pit; the generator uses the twelve colours of level 200.</li>
+<li><strong>Boosters:</strong> names, explanation texts, the three step chips, icon, first-use picture, <code>StartingCount</code> and <code>UnlockLevel</code> in the three assets of <code>Assets/Game/Integration/PowerUps</code>; unlocks, free charges and prices in <code>BoosterProgression.json</code>. Icons and pictures are in <code>Assets/Game/UI/Boosters</code>.</li>
+<li><strong>Rewards and menu:</strong> <code>StarterMenuConfig.asset</code> (<code>WinCoinReward</code> 50, <code>VisibleLevelCount</code> 500, gameplay scene name <code>Game</code>).</li>
+<li><strong>Look:</strong> materials in <code>Assets/Game/Resources/Materials</code>, shaders in <code>Assets/Game/Shaders</code>, post-processing in <code>Assets/Game/ProjectRenderSettings</code>. The procedural model set is the default; the two generated alternate sets are kept for the game's own built-in flow only.</li>
+<li><strong>Your identity:</strong> set company name, product name, application id and icons in Player Settings. In <code>Assets/HyperCasualLiveOpsKit/Resources/HLK/HLKSettings.asset</code> the rate prompt's Android package name ships as <code>com.ragendom.blockloopshooter</code> (the producer's development id): set it to your own application id, and set your share address, ad and purchase identifiers and privacy links before a release.</li>
+<li><strong>DEV controls:</strong> the DEV button and panel (choose level, reload level, test win and lose, ad and banner tests, save snapshot) exist only in the editor and in development builds; a release build does not show them.</li>
+</ul>
+</section>
+
+<section id="limitations">
+<h2>Limitations</h2>
+<ul>
+<li><strong>Tested:</strong> Windows desktop (editor, development player at 540 × 960 and other portrait sizes) and the clean import of this package with its tools and a played journey: wins on levels 1 to 16, 250 and 483, the loss on level 28 with TRY AGAIN, and each booster used and the level then won. An Android package was built from the producer project but has <strong>not</strong> been run on a device (notches, back button, lifecycle and performance on phones are unverified).</li>
+<li><strong>LocalQA profile:</strong> ads are labelled mock ads and purchases are local test flows. No live ad network, store billing, receipt validation, consent flow or privacy policy is configured; these are yours before a store release.</li>
+<li><strong>Sound:</strong> the game uses the kit's sound effects; a listening review on devices was not done. There is no music.</li>
+<li><strong>Presentation:</strong> at window shapes other than a level's own aspect, darker bands lie above and below or beside the board.</li>
+<li><strong>Not built:</strong> a fifth pad as level data (only the Pad + booster opens one), pits deeper than five rows, boxes opening upward, numbered or iridescent blocks, a hard-level banner.</li>
+<li><strong>Built-in flow:</strong> the game still contains its own single-scene flow (own HUD, result screen, model switch on M, debug overlay on F1, Esc / R / L keys, the three helpers with one charge on level 200 only). It is used only when <code>Game.unity</code> runs without the kit shell; under the shell those keys and screens are off.</li>
+<li><strong>Authored levels:</strong> the first level and level 200 have no layout block, so the level editor shows them as text and the generator never redrafts them. The generator takes its twelve colours from level 200. The other 498 levels are generated.</li>
+<li><strong>AI record:</strong> see <a href="#disclosure">AI Disclosure</a>; section 4 lists the 2D art files that carry no AI record.</li>
+</ul>
+</section>
+
+<section id="disclosure">
+<h2>AI Disclosure</h2>
+<p><code>Assets/Game/AI-DISCLOSURE.txt</code> lists every AI-generated or AI-assisted file of this folder by path: the three booster icons and three first-use pictures (generated in 2026-10 with an OpenAI image model; they carry content credentials), the two generated alternate 3D model sets in <code>Resources/NativeModels</code> (text-to-3D and image-to-3D; service not recorded), and the AI assistance with code, levels and documentation, including that the two authored levels were built by version 1's AI agent. Facts that were not recorded are marked "not recorded".</p>
+</section>
+
+<section id="support">
+<h2>Support</h2>
+<p>Contact <a href="mailto:satisvizion@gmail.com">satisvizion@gmail.com</a>. Please include your Unity version, the package version (Block Loop Shooter version 3) and the steps that reproduce the problem. Never send account credentials or signing keys.</p>
+</section>
+
+<section id="legal">
+<h2>Licences and Notices</h2>
+<p>The shared kit's licence and third-party notices are in <code>Assets/HyperCasualLiveOpsKit/Third-Party Notices.txt</code> and reproduced in the kit's guide. The package's own notices are in <code>Assets/Game/Third-Party Notices.txt</code>, reproduced below; they also name the licensed music and narration of the product's promotional video, which are not part of this package.</p>
+<h3>Third-Party Notices.txt</h3><pre>Block Loop Shooter — Third-Party Notices
+=======================================
+
+This file covers the Block Loop Shooter package as a whole: the game in
+Assets/Game and the HyperCasual LiveOps Kit in Assets/HyperCasualLiveOpsKit,
+and the third-party media used in the product&#x27;s promotional video.
+
+
+-------------------------------------------------------------------------------
+1. Assets/Game
+-------------------------------------------------------------------------------
+
+No third-party code, fonts, audio, images, models, shaders, DLLs or native
+binaries are redistributed in Assets/Game. The game uses Unity&#x27;s default fonts
+and plays the kit&#x27;s sound effects; it contains no sound or font file of its own.
+The images and 3D models made with AI tools are listed in
+Assets/Game/AI-DISCLOSURE.txt.
+
+
+-------------------------------------------------------------------------------
+2. Assets/HyperCasualLiveOpsKit
+-------------------------------------------------------------------------------
+
+The kit&#x27;s one third-party component, Robert Penner&#x27;s Easing Equations (BSD
+3-Clause License), and the kit&#x27;s optional, never-redistributed SDK
+integrations are described, with the full licence text, in
+Assets/HyperCasualLiveOpsKit/Third-Party Notices.txt.
+
+
+-------------------------------------------------------------------------------
+3. Promotional video media — used in the store video, not in this package
+-------------------------------------------------------------------------------
+
+The promotional video of this product (the video on its store page) uses two
+pieces of licensed audio. Neither is part of this package: no music file and no
+narration file is redistributed here, and buying this package grants no right
+to either of them.
+
+  a) Music bed
+
+     Track:     &quot;Motivation&quot; by eliveta
+     File:      eliveta-motivation-491193.mp3
+                (sha256 a94fa529774ff05cce6f1e30fc40065b1556ef61c3ad0c7bb949aa21d6037def)
+     Used in:   the promotional video only, as background music
+     Licence:   used by Satisvizion under Satisvizion&#x27;s licence for this
+                track, which covers its use in Satisvizion&#x27;s promotional
+                videos. The track is the property of its author and is not
+                sublicensed or redistributed with this package. To use it in
+                your own work, obtain your own licence from its author or
+                distributor.
+
+  b) Narration
+
+     What:      the nine spoken voice-over lines of the promotional video
+     Made with: ElevenLabs text-to-speech (voice &quot;Brian - Deep, Resonant and
+                Comforting&quot;, model Eleven Multilingual v2), from scripts
+                written by Satisvizion
+     Used in:   the promotional video only
+     Licence:   generated and used by Satisvizion under Satisvizion&#x27;s
+                ElevenLabs subscription and the ElevenLabs Terms of Service,
+                which cover this use in Satisvizion&#x27;s promotional videos. The
+                audio files are not redistributed with this package, and the
+                ElevenLabs voice is not licensed to you through it.
+
+
+-------------------------------------------------------------------------------
+Contact
+-------------------------------------------------------------------------------
+
+Questions about licensing in this package: satisvizion@gmail.com
+</pre>
+</section>
+</main>
+</body>
+</html>
