@@ -1,0 +1,131 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Brain Dots guide</title><style>body{font:16px sans-serif;max-width:900px;margin:36px auto;padding:0 24px;line-height:1.55}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style><body><main><h1>Brain Dots</h1>
+<p>Offline game and authoring guide. Open this file locally; no account or service is required for the drawing puzzle. Distribution, platform submission and monetization setup remain the buyer's responsibility.</p>
+<h2>Import and start</h2><p>Use Unity 6000.0.62f1 with Universal Render Pipeline 17.0.4, Input System 1.8.1, UGUI 2.0.0, TextMeshPro and Unity's normal built-in modules. Install dependencies through Unity's Package Manager. Import the supplied archive into an empty project. Retain every .meta file; these identify scenes, sprites and materials. The principal roots are Assets/Game and Assets/HyperCasualLiveOpsKit. Unity's standard TextMesh Pro resources are retained as an explicit dependency exception. No third-party font is installed by this game.</p>
+<p>Call BrainDots.EditorTools.PackageExport.RunFullSetup from your editor integration to configure existing scene references, Input System and supplied render assets. This configures files; it does not download a kit or generate gameplay. Open Assets/Game/Scenes/Game.unity to play the board directly. The supplied starter menu scene can be the first release scene if you choose to use that dependency. Its service adapters require your own configuration and review.</p>
+<h2>Play</h2><p>Draw with the left mouse button or a single touch inside the board. Release to let the ink move under physics. Help the blue and pink dots touch. Some later levels can lose when a required dot leaves the play area. Retry is free and restarts the board. It preserves earned progress, coins and remaining booster stock; a charge already spent stays spent. There is no timer or promised rescue from every bad drawing. Use Retry when a position cannot be completed. A completed level can proceed to the next board.</p>
+<h2>Boosters</h2><p>Rewind unlocks at level 2 and restores the board to before the latest drawing; earlier ink stays. Erase unlocks at level 7: select it, then select a piece of your ink; other ink remains. Select Erase again to cancel targeting. Nudge unlocks at level 12 and gives the two required dots a small inward push. It does not teleport them or guarantee completion. Stocked, unlocked effects are colored when usable on the current board. Empty, locked or currently unusable effects are gray. An unlocked empty booster remains selectable and opens acquisition offers. Unlocks follow earned progress. Each successful effect spends one charge. An invalid target or cancelled Erase spends none. Game policy grants two charges on first unlock; subsequent coin refills supply one charge, starting at 100 coins and increasing by 25 for each ten-level price step. See Resources/BrainDots/BoosterPolicy.json before changing policy. Optional rewarded-service controls need a real configured provider; no live ad delivery is represented here.</p>
+<h2>Levels and tools</h2><p>Use Tools/Brain Dots/Documentation, Tools/Brain Dots/Level Editor and Tools/Brain Dots/Auto Level Generator. The editor resolves imported Resources/Levels data, so it works after relocation and without producer folders. Load a level by number, inspect dots/platforms, change normalized coordinates, duplicate a draft, or copy a draft to another destination slot. Edit &gt; Undo restores draft edits. Publishing writes files; keep version-control backups for published changes. The first level is read-only; the editor also protects level 200. Duplicate a protected board before editing.</p>
+<p>Geometry edits clear the stored winning witness. Solve current draft runs the bounded game solver. Publish is available only when replay of the legal-input witness wins. A solver failure means unproven, not impossible. The generator offers up to 64 geometry variants for unused numbers above 500. It creates a draft from supplied shapes and attempts a solution; it does not certify a new campaign or replace art. Review every changed level in real gameplay and review progression, obstacles, variety and performance before release. Copying into an existing destination replaces that slot on Publish; it does not automatically move the displaced level.</p>
+<p>Data lives under Assets/Game/Resources/Levels. CampaignAuthoring.json binds layouts to input witnesses. Resource lookup keys remain Levels/Level_N, Levels/level-N and Levels/CampaignAuthoring. Render settings live under Assets/Game/ProjectRenderSettings. Keep their GUIDs intact. Five hundred published starting layouts have retained winning witnesses. Some bad-move states require Retry; winning continuations from those same states are not promised.</p>
+<h2>Audio and customization</h2><p>Existing game event integration requests release, arrival, completion and failure sounds through the supplied audio dependency. The shared sound preference controls game cues and is persisted. Replace only assets you own, preserve required references and test mute, unmute and cold reload after changes. Subjective balance and device listening require your review. Use Unity's default TMP font and LegacyRuntime.ttf; this product does not fetch fonts. Existing public settings and game policy files can be adjusted with corresponding gameplay and save migration review.</p>
+<h2>Build and delivery</h2><p>Install the Unity target module for your chosen platform, then build the included Boot and Game scenes. Configure optional service adapters and your platform's privacy disclosures before distribution. Device, service and store requirements depend on your chosen deployment.</p>
+<h2>Known limits</h2><p>The game uses a deterministic 2D simulation. Small drawing changes, especially on dot-pile boards, can produce different trajectories. Free Retry provides recovery after an unhelpful drawing. Layout should be reviewed at your target aspect ratios. See Developer-Note.txt for product limitations. Licences and notices govern use of the included content; AI assistance is described in AI-DISCLOSURE.txt.</p>
+<h2>Scripts, variation and a level example</h2><p>Bootstrap loads the Game scene. GameController accepts drawing input and advances the core Sim; GameUI and WorldView present the board. LevelCatalog resolves numbered Resources. BrainDotsBoosters supplies the three real effects; BrainDotsHlkBridge connects outcomes, game sounds and saved progress to the supplied dependency. BuyerLevelTools edits drafts; CampaignDraft and CampaignSolver support bounded candidate search. Vary existing dot/platform coordinates, supported shape arrangements and physics parameters only after reviewing changed play. Adding art or mechanics is your own development work.</p><p>The following is a complete shipped level definition:</p><pre>{
+  &quot;levelId&quot;: &quot;level-2&quot;,
+  &quot;levelNumber&quot;: 2,
+  &quot;title&quot;: &quot;Level 2&quot;,
+  &quot;aspect&quot;: 0.67,
+  &quot;pen&quot;: &quot;pencil&quot;,
+  &quot;penRadius&quot;: 0.006,
+  &quot;minInkSpacing&quot;: 0.004,
+  &quot;tapMaxMove&quot;: 0.006,
+  &quot;balls&quot;: [
+    {
+      &quot;id&quot;: &quot;ball-blue&quot;,
+      &quot;x&quot;: 0.33,
+      &quot;y&quot;: 0.2998,
+      &quot;d&quot;: 0.05,
+      &quot;color&quot;: &quot;#33B5F3&quot;
+    },
+    {
+      &quot;id&quot;: &quot;ball-pink&quot;,
+      &quot;x&quot;: 0.67,
+      &quot;y&quot;: 0.2998,
+      &quot;d&quot;: 0.05,
+      &quot;color&quot;: &quot;#F595B4&quot;
+    }
+  ],
+  &quot;rects&quot;: [
+    {
+      &quot;id&quot;: &quot;floor&quot;,
+      &quot;kind&quot;: &quot;platform&quot;,
+      &quot;minX&quot;: 0,
+      &quot;minY&quot;: 0.9,
+      &quot;maxX&quot;: 1,
+      &quot;maxY&quot;: 1,
+      &quot;collides&quot;: true
+    }
+  ],
+  &quot;physics&quot;: {
+    &quot;gravity&quot;: 500,
+    &quot;friction&quot;: 0.3,
+    &quot;density&quot;: 0.6,
+    &quot;ballDensity&quot;: 0.5,
+    &quot;ballFriction&quot;: 0.08,
+    &quot;iterations&quot;: 12,
+    &quot;stepSeconds&quot;: 0.005
+  },
+  &quot;feedback&quot;: {
+    &quot;resultDelayMs&quot;: 2167,
+    &quot;popupDelayMs&quot;: -1
+  }
+}</pre>
+<h2>Product limitations</h2><ul><li>The dots can continue settling after contact. Their final resting positions can vary with the drawing.</li><li>Level 200 uses input-sensitive dot-pile physics. Small changes in dot placement can change trajectories and completion time.</li><li>Game audio consists of drawing, arrival, completion and failure cues. The game does not include continuous background music. Typography uses Unity&#x27;s default fonts.</li><li>Ink is rendered without a crayon texture. Tutorial pointers and completion stars are illustrative animations.</li><li>Geometry is two-dimensional. The legacy model-mode control changes its label only. Review layout on your intended device and aspect ratio.</li><li>Completion time depends on actual drawing and device scheduling. The game does not promise a fixed wall-clock completion time.</li></ul><p>Review real-clock timing on your target device; a deterministic winning witness alone is not a device-performance guarantee.</p>
+<h2>Support</h2><p>Contact <a href="mailto:satisvizion@gmail.com">satisvizion@gmail.com</a>. Keep your purchase record for licence questions.</p><p>Read the <a href="Developer-Note.txt">developer note</a> for the six inherited limitations, their reasons and evidence limits.</p><h2>Original legal notices</h2><h2>Original legal notices</h2><h3>LiberationSans - OFL.txt</h3><pre>Digitized data copyright (c) 2010 Google Corporation
+	with Reserved Font Arimo, Tinos and Cousine.
+Copyright (c) 2012 Red Hat, Inc.
+	with Reserved Font Name Liberation.
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+This license is copied below, and is also available with a FAQ at: http://scripts.sil.org/OFL
+
+-----------------------------------------------------------
+SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
+-----------------------------------------------------------
+
+PREAMBLE
+The goals of the Open Font License (OFL) are to stimulate worldwide development of collaborative font projects, to support the font creation efforts of academic and linguistic communities, and to provide a free and open framework in which fonts may be shared and improved in partnership with others.
+
+The OFL allows the licensed fonts to be used, studied, modified and redistributed freely as long as they are not sold by themselves. The fonts, including any derivative works, can be bundled, embedded, redistributed and/or sold with any software provided that any reserved names are not used by derivative works. The fonts and derivatives, however, cannot be released under any other type of license. The requirement for fonts to remain under this license does not apply to any document created using the fonts or their derivatives.
+
+DEFINITIONS
+&quot;Font Software&quot; refers to the set of files released by the Copyright Holder(s) under this license and clearly marked as such. This may include source files, build scripts and documentation.
+
+&quot;Reserved Font Name&quot; refers to any names specified as such after the copyright statement(s).
+
+&quot;Original Version&quot; refers to the collection of Font Software components as distributed by the Copyright Holder(s).
+
+&quot;Modified Version&quot; refers to any derivative made by adding to, deleting, or substituting -- in part or in whole -- any of the components of the Original Version, by changing formats or by porting the Font Software to a new environment.
+
+&quot;Author&quot; refers to any designer, engineer, programmer, technical writer or other person who contributed to the Font Software.
+
+PERMISSION &amp; CONDITIONS
+Permission is hereby granted, free of charge, to any person obtaining a copy of the Font Software, to use, study, copy, merge, embed, modify, redistribute, and sell modified and unmodified copies of the Font Software, subject to the following conditions:
+
+1) Neither the Font Software nor any of its individual components, in Original or Modified Versions, may be sold by itself.
+
+2) Original or Modified Versions of the Font Software may be bundled, redistributed and/or sold with any software, provided that each copy contains the above copyright notice and this license. These can be included either as stand-alone text files, human-readable headers or in the appropriate machine-readable metadata fields within text or binary files as long as those fields can be easily viewed by the user.
+
+3) No Modified Version of the Font Software may use the Reserved Font Name(s) unless explicit written permission is granted by the corresponding Copyright Holder. This restriction only applies to the primary font name as presented to the users.
+
+4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font Software shall not be used to promote, endorse or advertise any Modified Version, except to acknowledge the contribution(s) of the Copyright Holder(s) and the Author(s) or with their explicit written permission.
+
+5) The Font Software, modified or unmodified, in part or in whole, must be distributed entirely under this license, and must not be distributed under any other license. The requirement for fonts to remain under this license does not apply to any document created using the Font Software.
+
+TERMINATION
+This license becomes null and void if any of the above conditions are not met.
+
+DISCLAIMER
+THE FONT SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM OTHER DEALINGS IN THE FONT SOFTWARE.</pre><section id="worked-authoring"><h2>Worked authoring examples</h2>
+<p>The generator is deterministic from <strong>New level number</strong> and <strong>Geometry variant</strong> (0â€“63). It has no editable random-seed control. Repeating the same pair produces the same geometry; changing the variant changes the supplied shape arrangement. A draft is not a proven level until the solver finds a legal winning witness.</p>
+<ol><li>Open <strong>Tools/Brain Dots/Auto Level Generator</strong>. Set <strong>New level number</strong> to 501 and <strong>Geometry variant</strong> to 0. Click <strong>Create draft from supplied shapes</strong>. This creates an in-memory draft and runs the bounded solver; no published file changes.</li>
+<li>If the result is UNPROVEN, try variants 1 through 63 until <strong>Winning witness available</strong> appears. An unproven draft cannot be published. No claim is made that every variant is solvable.</li>
+<li>Click <strong>Publish validated draft</strong> for a winning draft. This appends <code>Assets/Game/Resources/Levels/Level_501.json</code> and a matching witness row to <code>CampaignAuthoring.json</code>. Existing level files and the original catalog prefix remain intact. Repeat with unused slot 502 to append a second level.</li>
+<li>Close the window before publication to cancel without changing files. Publishing an edited existing destination replaces that destination and its witness; it is not an append. The generator rejects slots 500 and below. The editor's protected baseline slots remain read-only.</li></ol>
+<h3>Edit, validate, save and play</h3>
+<p>On a copy of the imported project, open <strong>Tools/Brain Dots/Level Editor</strong>, enter <strong>Level number</strong> 9 and click <strong>Load imported level</strong>. Click <strong>Duplicate as a new draft</strong>, set <strong>Destination slot</strong> to unused 503, and click <strong>Copy draft to destination slot</strong>. Select <strong>Platform</strong> 0. In <strong>Left / top / right / bottom</strong>, change only the left value from 0.48 to 0.481 (the JSON field is <code>rects[0].minX</code>). Geometry edits clear the witness. Click <strong>Solve current draft</strong>; publish only if a winning witness is available. <strong>Edit &gt; Undo</strong> restores a draft operation before publication.</p>
+<p>Click <strong>Publish validated draft</strong>, reload level 503, and confirm the platform left value is 0.481. Play the saved geometry using the core replay entry point <code>CampaignDraft.Replay(savedJson, savedWitness, out simulation)</code>; the returned simulation must reach <code>Phase.Won</code>. This replays legal drawing inputs through the same game simulation. Also review ordinary player input, timing and presentation before using an edited level in your campaign. The shipped editor does not include a special playtest button or a random-seed field. To discard this example, restore the copied project or remove the new level and its matching authoring row together; do not remove only one.</p>
+<h3>Fields in the complete level example</h3>
+<dl><dt><code>levelId</code>, <code>levelNumber</code>, <code>title</code></dt><dd>Stable level identifier, positive numbered slot and displayed title.</dd>
+<dt><code>aspect</code></dt><dd>Gameplay rectangle height divided by width. Coordinates use this rectangle, with the origin at its top left.</dd>
+<dt><code>pen</code>, <code>penRadius</code></dt><dd>Pen style identifier and stroke radius normalized to gameplay width.</dd>
+<dt><code>minInkSpacing</code>, <code>tapMaxMove</code></dt><dd>Minimum spacing between stored stroke points and movement threshold for a tap, normalized to gameplay width.</dd>
+<dt><code>balls</code></dt><dd>Two target dots. Each has an <code>id</code>, center <code>x</code>/<code>y</code>, width-normalized diameter <code>d</code>, and HTML <code>color</code>.</dd>
+<dt><code>rects</code></dt><dd>Supplied rectangular geometry. Each has an <code>id</code>, <code>kind</code>, normalized bounds <code>minX</code>/<code>minY</code>/<code>maxX</code>/<code>maxY</code>, and boolean <code>collides</code>.</dd>
+<dt><code>physics.gravity</code></dt><dd>Downward acceleration in simulation world units. The simulation world width is 1000.</dd>
+<dt><code>physics.friction</code>, <code>physics.density</code></dt><dd>Drawn-body surface friction and density.</dd>
+<dt><code>physics.ballDensity</code>, <code>physics.ballFriction</code></dt><dd>Target-dot density and friction.</dd>
+<dt><code>physics.iterations</code>, <code>physics.stepSeconds</code></dt><dd>Solver iterations and fixed simulation step in seconds. Changing these affects the replay contract.</dd>
+<dt><code>feedback.resultDelayMs</code>, <code>feedback.popupDelayMs</code></dt><dd>Result presentation timing in milliseconds. A popup delay of -1 disables that popup.</dd></dl>
+<p>The JSON example is the complete exported level 2. Optional tutorial and feedback fields in other levels are parsed by <code>LevelData.FromJson</code>; read that shipped parser before adding fields. Changes to physics, geometry or drawing parameters require a new winning witness and gameplay review.</p></section>
+</main></body></html>
