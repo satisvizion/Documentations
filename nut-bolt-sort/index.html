@@ -1,0 +1,159 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Nut Bolt Sort — User Manual</title><style>body{margin:0;background:#edf3f9;color:#17283b;font:17px/1.7 system-ui,sans-serif}main{max-width:1080px;margin:auto;background:#fff;padding:48px 56px}h1{font-size:48px;color:#14364e;line-height:1.1}h2{padding-top:26px;border-top:2px solid #e2edf3;color:#126482}h3{color:#126482}a{color:#126e99}table{width:100%;border-collapse:collapse;font-size:15px}td,th{border:1px solid #ccdbe4;padding:10px;text-align:left}th{background:#eaf3f8}pre{padding:20px;background:#102c42;color:#e5f2fa;overflow:auto;border-radius:12px}code{font-family:Consolas,monospace;font-size:.9em}img{max-width:100%;height:auto}@media(max-width:700px){main{padding:24px}h1{font-size:36px}table{display:block;overflow:auto}}</style></head><body><main><h1 id="nut-bolt-sort">Nut Bolt Sort</h1>
+<p>Version 1.0.0 · SatisVizion · Unity 6000.0.62f1 · Universal Render Pipeline 17.0.4</p>
+<p>Tap a bolt to lift its top matching nuts, then tap a compatible bolt to move them. Fill a bolt with one colour to cap it. Clear the workbench to advance. The template includes 25 authored levels and seeded procedural continuation, four boosters, a level editor, and HyperCasual LiveOps Kit integration.</p>
+<h2 id="contents">Contents</h2>
+<p><a href="#first-run">First run</a> · <a href="#gameplay">Gameplay</a> · <a href="#level-editing">Level editing</a> · <a href="#generation">Generation</a> · <a href="#boosters">Boosters</a> · <a href="#customisation">Customisation</a> · <a href="#liveops-and-ads">LiveOps and ads</a> · <a href="#builds">Builds</a> · <a href="#troubleshooting">Troubleshooting</a> · <a href="#licences-and-support">Licences and support</a></p>
+<h2 id="first-run">First run</h2>
+<ol>
+<li>Install Unity <strong>6000.0.62f1</strong> through Unity Hub. Install Android Build Support with its matching SDK, NDK and OpenJDK for Android, and WebGL Build Support for browser builds.</li>
+<li>Open the supplied standalone project, or import the package into a Unity 6 URP project.</li>
+<li>Required Unity packages: URP <strong>17.0.4</strong>, uGUI <strong>2.0.0</strong>, Input System <strong>1.14.2</strong>, and the Unity Audio, Animation, Physics, Physics2D, UI, UIElements, IMGUI, JSONSerialize, ParticleSystem, ImageConversion, UnityWebRequest, ScreenCapture and AndroidJNI modules. The complete project includes its package manifest.</li>
+<li>In Edit → Project Settings → Player → Other Settings, set <strong>Active Input Handling = Both</strong>. Restart Unity if prompted. The game reads legacy pointer input and HLK also uses the Input System.</li>
+<li>Open <code>Assets/Games/NutSort/Scenes/NutSort_Mobile.unity</code>, then press Play. This scene uses the portrait layout. <code>NutSort_WebGL.unity</code> provides a landscape layout; use only the scene appropriate for your own build, or landscape followed by portrait if retaining the <code>?mobile=1</code> scene-switch route.</li>
+<li>If importing a package, run <strong>Nut Bolt Sort → Setup</strong> to activate the game's supplied URP settings. Select the built-in Default WebGL template when building from a fresh project.</li>
+</ol>
+<p>All three supplied asset roots are required: <code>Assets/Games/NutSort</code>, <code>Assets/HyperCasualLiveOpsKit</code>, and <code>Assets/TextMesh Pro</code>. Keep their <code>.meta</code> files. The private <code>NutSort/Kit</code> folder supplies gameplay/UI/audio helpers and is required game code.</p>
+<h2 id="gameplay">Gameplay</h2>
+<p>Click or tap a bolt, then another bolt. Only a matching top colour or an empty bolt can receive a move; available space limits how many nuts transfer. Filled single-colour bolts receive a cap. Rust hides colours until exposed, a key nut opens a padlocked bolt when moved away, and tall bolts hold five nuts.</p>
+<p>The first levels guide the basic moves. New mechanics and boosters introduce themselves through popups. Completion awards gears: 20 for a normal level or 40 for a hard level, plus any other earned gears. Progress, charges and settings save locally through PlayerPrefs; WebGL storage depends on the browser profile. When no legal move remains, the recovery popup offers applicable undo/spare/retry actions.</p>
+<p>The source renders its workshop, bolts and nuts using procedural meshes and URP materials, with uGUI overlays. The interaction is a tap-based sorting puzzle. Keep the supplied scene/camera setup rather than converting its rendering pipeline based on the genre label.</p>
+<h2 id="level-editing">Level editing</h2>
+<p>Open <strong>Nut Bolt Sort → Level Editor</strong>. The editor reads and writes <code>Assets/Games/NutSort/Resources/nutsort/Levels/levels.json</code>.</p>
+<p>To make a first edit:
+1. Select an existing level in the list and duplicate it, keeping the original tutorial unchanged.
+2. Select a bolt, choose a nut colour, and paint the bolt from bottom to top. Use the erase brush to remove that slot and the nuts above it. Keep colour totals consistent with the bolt capacity.
+3. Adjust bolt capacity, rust, key position and the optional padlocked bolt. The key must be on a different bolt from the lock.
+4. Run the editor's validation/solver controls. Read the actual result; a design difficulty value is a target, not a proof that a player will solve it.
+5. Save the level file. In Play mode open the <strong>DEV</strong> panel and jump to the new level number. Play the changed board and confirm its intended solution.</p>
+<p>The editor supports add, duplicate, delete, reorder, undo and save prompts. <strong>Nut Bolt Sort → Validate All Levels</strong> is available for authoring validation.</p>
+<h3 id="data-format">Data format</h3>
+<p><code>bolts</code> strings read <strong>bottom to top</strong>. Lowercase <code>a</code>–<code>l</code> are colours; uppercase marks rust. <code>cap</code> is bolt capacity. <code>lockBolt</code>, <code>keyBolt</code> and <code>keySlot</code> are zero-based; <code>-1</code> disables the lock/key. <code>hard</code>, <code>breather</code>, <code>tut</code>, <code>hint</code> and <code>difficulty</code> control presentation, guidance and generation intent.</p>
+<pre><code class="language-json">{
+  &quot;version&quot;: 1,
+  &quot;levels&quot;: [
+    {
+      &quot;name&quot;: &quot;First Turn&quot;,
+      &quot;cap&quot;: 4,
+      &quot;bolts&quot;: [
+        &quot;aaa&quot;,
+        &quot;a&quot;
+      ],
+      &quot;lockBolt&quot;: -1,
+      &quot;keyBolt&quot;: -1,
+      &quot;keySlot&quot;: -1,
+      &quot;hard&quot;: false,
+      &quot;breather&quot;: true,
+      &quot;tut&quot;: 1,
+      &quot;hint&quot;: &quot;&quot;,
+      &quot;difficulty&quot;: 0
+    }
+  ]
+}
+</code></pre>
+<p>The top nut is normalised clean by the runtime. A winning bolt is full and all one colour. Keep the model's maximums in mind: 12 colours, 16 bolts and capacity up to 6; the delivered design uses four- and five-nut bolts.</p>
+<h2 id="generation">Generation</h2>
+<p>The editor's <strong>Auto Generate</strong> controls include count/start, seed, empty bolts, colour range, rust range, difficulty range, breathers, locks, tall bolts, spread layout and replacement. Generate a small batch, inspect its solver/difficulty results, save, then play the new boards.</p>
+<p>After the 25 authored levels, <code>NsLevels.Get</code> uses <code>NsGen.Curve</code> and the deterministic seed <code>level * 7919 + 1301</code>. Generated levels cycle through breather, rust, lock, combined and hard recipes. The generator uses bounded solver attempts, alternate seeds, extra room and a constructive fallback. The delivered content is <strong>25 authored levels plus procedural continuation</strong>, rather than a claim of 500 authored boards.</p>
+<h2 id="boosters">Boosters</h2>
+<table>
+<thead>
+<tr>
+<th>Booster</th>
+<th style="text-align: right;">Unlock</th>
+<th style="text-align: right;">Initial charges</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Undo</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+<td>Reverses a recorded move.</td>
+</tr>
+<tr>
+<td>Hint</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td>Shows a suggested next move.</td>
+</tr>
+<tr>
+<td>Spare Bolt</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">2</td>
+<td>Adds one empty bolt, once per level and within the model's bolt limit.</td>
+</tr>
+<tr>
+<td>Rust Spray</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2</td>
+<td>Choose a rusty bolt to clean its rust.</td>
+</tr>
+</tbody>
+</table>
+<p>When a usable booster has no charges, its popup offers one charge for <strong>60 gears</strong> when affordable or a rewarded-ad refill. A reward is granted only when the ad callback reports completion. Failed/skipped/unavailable ads do not grant a reward. Tutorial guidance can temporarily restrict unrelated actions.</p>
+<h2 id="customisation">Customisation</h2>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Files</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gameplay and progression</td>
+<td><code>Scripts/NutSortGame.cs</code>, <code>NsModel.cs</code>, <code>NsLevels.cs</code>, <code>NsGen.cs</code></td>
+</tr>
+<tr>
+<td>HUD, tutorial and popup layout</td>
+<td><code>Scripts/NutSortGame.Hud.cs</code></td>
+</tr>
+<tr>
+<td>Colours, materials, procedural scene and animations</td>
+<td><code>Scripts/NutSortGame.View.cs</code>, <code>NsMeshes.cs</code>, <code>Resources/nutsort/Materials</code>, <code>Settings</code></td>
+</tr>
+<tr>
+<td>SFX and music</td>
+<td><code>Scripts/NsSfx.cs</code>, <code>Resources/nutsort/Sfx</code>, <code>Resources/nutsort/Music</code></td>
+</tr>
+<tr>
+<td>Shared game UI/audio/ad/haptic helpers</td>
+<td><code>Kit/Runtime</code></td>
+</tr>
+<tr>
+<td>Level authoring</td>
+<td><code>Editor/NutSortLevelEditor.cs</code>, <code>Editor/NutSortImport.cs</code></td>
+</tr>
+<tr>
+<td>Levels</td>
+<td><code>Resources/nutsort/Levels/levels.json</code></td>
+</tr>
+</tbody>
+</table>
+<p>Preserve Resources paths unless you update all matching code references. The standalone game's helper namespace is <code>NutBoltSort</code>; level data/model types use <code>NutSort</code>. Existing script and asset GUIDs are retained.</p>
+<p>The developer panel opens with <strong>DEV</strong>, <strong>F2</strong>, backquote, or five quick taps in the top-left corner. It controls level jumps, booster availability, ads and vibration. Keep it for development; define <code>HZ_RELEASE</code> in Player Settings when you want its controls compiled out of your consumer build.</p>
+<h2 id="liveops-and-ads">LiveOps and ads</h2>
+<p>Included LiveOps asset: <a href="https://assetstore.unity.com/packages/tools/utilities/hypercasual-liveops-kit-ads-iap-retention-mobile-services-397070">HyperCasual LiveOps Kit</a>. Its <a href="HyperCasualLiveOpsKit.html">complete offline manual</a> is included alongside the game.</p>
+<p>Configuration: <code>Assets/HyperCasualLiveOpsKit/Resources/HLK/HLKSettings.asset</code>. The delivered configuration uses <strong>Ads Mode Dummy</strong>, with simulated banner, interstitial and rewarded ads and <strong>no advertising provider SDK</strong>. Integration is via <code>Kit/Runtime/HzAds.cs</code>, <code>HzPlatform</code>, and the three placement assets under <code>Kit/Resources/nutsort/kit/Ads</code>.</p>
+<p>The banner reserves layout space. Interstitials occur at natural progression breaks. Rewarded ads support booster refill and eligible recovery actions. These are simulation features for development/showcase, not live revenue-generating ads. Public sample ad-unit identifiers, where present, are test identifiers. Native haptics require an appropriate device; browser behaviour differs.</p>
+<p>No Google Mobile Ads SDK, External Dependency Manager, Hyperoza portal integration or other provider SDK is bundled. Automatic provider installers are disabled. If you choose to enable a provider, install it separately from the provider's official distribution, follow the HLK manual, configure your own identifiers/consent settings, and test the selected platform. Do not enable SDK scripting symbols for packages you have not installed. Other HLK services are configurable kit capabilities; the game does not claim every kit service is configured for production.</p>
+<h2 id="builds">Builds</h2>
+<p><strong>Android:</strong> select the Mobile scene, Android build target, portrait orientation, your own application identifier, ARM64/IL2CPP and matching Unity Android tools. The supplied demo is a development APK signed with a debug key. It is not a signed production AAB or a Google Play submission. Configure your own signing and release settings for publication.</p>
+<p><strong>WebGL:</strong> select the Mobile scene for the portrait demo, the Default WebGL template, and build with Unity's WebGL module. Serve the entire output over HTTP(S). Keep loader, framework, data and WASM files together; opening <code>index.html</code> via <code>file://</code> is unsupported. Brotli with Unity decompression fallback is suitable for a static host. Browser audio normally needs the first click/tap. Native services and haptics have browser limitations.</p>
+<p>For the supplied standalone project's two-scene landscape-first route, <code>?mobile=1</code> switches to the following Mobile scene. A portrait-only build should simply use the Mobile scene without that switch.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<ul>
+<li><strong>Missing types after import:</strong> install the documented Unity packages, import all three required roots, and keep <code>.meta</code> files.</li>
+<li><strong>Pointer input exceptions:</strong> set Active Input Handling to Both and restart the editor.</li>
+<li><strong>Pink materials or wrong rendering:</strong> use URP 17.0.4 and the supplied NutSort pipeline/renderer; run Setup and select the built-in WebGL template.</li>
+<li><strong>No real ad revenue:</strong> Dummy mode is simulated. A separately configured provider and its SDK are required for real ads.</li>
+<li><strong>A booster is unavailable:</strong> check its unlock level, charges, current tutorial/guide, and whether its action is applicable.</li>
+<li><strong>An imported scene appears sparse in edit mode:</strong> UI and workshop objects are built at runtime. Press Play.</li>
+<li><strong>Progress persists between tests:</strong> use the developer reset controls; clearing PlayerPrefs removes saved progress/settings.</li>
+<li><strong>An external URL is unavailable offline:</strong> this manual and the included kit manual are local HTML. External provider links require internet.</li>
+</ul>
+<h2 id="licences-and-support">Licences and support</h2>
+<p>See <code>../Third-Party Notices.txt</code>, the original font licences in <code>Kit/Resources/nutsort/kit/Fonts</code>, the TextMesh Pro Liberation Sans OFL notice, and the included HLK licence/notices. Required legal disclosures are included; optional third-party SDKs are not redistributed.</p>
+<p>See <code>../AI-DISCLOSURE.txt</code> for factual AI assistance disclosure. Marketing artwork is distinct from actual gameplay screenshots.</p>
+<p>For product help, contact <strong>SatisVizion</strong> at <strong>satisvizion@gmail.com</strong>.</p></main></body></html>
