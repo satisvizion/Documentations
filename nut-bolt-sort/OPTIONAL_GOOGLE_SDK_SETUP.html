@@ -1,0 +1,20 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>HyperCasual LiveOps Kit guide</title><style>body{font:16px/1.65 system-ui;max-width:1000px;margin:40px auto;padding:0 24px;color:#17283b}pre{white-space:pre-wrap;background:#f1f5fa;padding:18px}table{border-collapse:collapse}td,th{border:1px solid #bbc;padding:8px}img{max-width:100%}</style><h1>Optional Google SDK setup</h1>
+<p>HyperCasual LiveOps Kit does not bundle or automatically install Firebase, Google Play Games Services, or their dependency tooling. The runtime adapters remain optional and compile only when the matching vendor SDK and HLK define are present.</p>
+<h2>Firebase</h2>
+<ol>
+<li>Back up or commit the project.</li>
+<li>Follow Google's current <a href="https://firebase.google.com/docs/unity/setup">Firebase Unity setup guide</a>.</li>
+<li>Install only the Firebase products used by the game and keep all Firebase products on one compatible version.</li>
+<li>Add the platform configuration files supplied by Firebase.</li>
+<li>Complete the vendor's Android/iOS dependency steps, then enable only the matching HLK integration defines.</li>
+<li>Validate consent, account configuration, signing, native builds, and device behavior before release.</li>
+</ol>
+<h2>Google Play Games Services</h2>
+<ol>
+<li>Follow Google's current <a href="https://developer.android.com/games/pgs/unity/unity-start">Play Games Services Unity guide</a>.</li>
+<li>Configure the app, OAuth/signing identities, testers, and service IDs in Play Console.</li>
+<li>Install the supported SDK using the vendor's documented method.</li>
+<li>Enable the HLK Play Games integrations only after the SDK is present.</li>
+<li>Test sign-in and each enabled service in a signed Android build on a configured device.</li>
+</ol>
+<p>HLK does not change package manifests, fetch SDK archives, import vendor packages, run dependency resolution, activate cloud services, create credentials, or alter signing. Those operations remain under the developer's explicit control.</p></html>

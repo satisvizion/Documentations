@@ -1,0 +1,132 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>HyperCasual LiveOps Kit guide</title><style>body{font:16px/1.65 system-ui;max-width:1000px;margin:40px auto;padding:0 24px;color:#17283b}pre{white-space:pre-wrap;background:#f1f5fa;padding:18px}table{border-collapse:collapse}td,th{border:1px solid #bbc;padding:8px}img{max-width:100%}</style><h1>HLK V2 Implementation Guide</h1>
+<h2>Contract-first architecture</h2>
+<p>HLK V2 separates four facts that older all-in-one kits commonly blur:</p>
+<ol>
+<li><strong>Contract present</strong> — game code can compile against a stable provider-neutral API.</li>
+<li><strong>Capability supported</strong> — the current platform/provider supports the operation.</li>
+<li><strong>Authority sufficient</strong> — the provider is trusted to make the requested mutation.</li>
+<li><strong>Evidence validated</strong> — release/device tests have proved the configured integration.</li>
+</ol>
+<p>An editor simulator can therefore be contract-ready and useful without claiming it
+is a server-authoritative economy or a working device SDK.</p>
+<h2>Common operation model</h2>
+<p>V2 operations return <code>OperationResult</code> or <code>OperationResult&lt;T&gt;</code>. The result carries a
+stable status, redaction-safe error code, retry guidance, and correlation context.
+Provider exceptions and raw secrets do not cross the public boundary.</p>
+<pre><code class="language-csharp">var correlation = CorrelationContext.Create(&quot;claim-button&quot;);
+OperationResult result = command.Execute(correlation);
+if (!result.IsSuccess)
+    ShowLocalizedError(result.Error.Code);
+</code></pre>
+<h2>Capability and authority checks</h2>
+<p>Use capability descriptors before exposing provider-specific UI. Treat
+<code>Unsupported</code>, <code>Unavailable</code>, and insufficient authority as normal states. Do not
+infer support from the current operating system alone.</p>
+<p>The V2 protected-value APIs require server-authoritative evidence. <code>LocalPrototype</code>
+simulators are intended for deterministic tests, sample scenes, and game-design iteration.
+Base IAP separately supports an explicitly selected client-side fulfillment path in
+Release builds; it does not claim protected-value/server authority. See
+<a href="IAP_FULFILLMENT.html">IAP fulfillment choices</a> for local and server options.</p>
+<h2>Initialization</h2>
+<p><code>InitializationGraph</code> validates dependencies before startup, detects duplicate IDs
+and cycles, respects required versus optional dependencies, applies cancellation and
+timeouts, and produces a deterministic report. Consent/audience policy should be a
+required dependency of personalized ads, attribution, and non-essential analytics.</p>
+<h2>Configuration</h2>
+<p><code>ConfigurationEngine</code> accepts immutable candidate snapshots. A schema validates
+required keys, types, numeric/allowed-value constraints, unknown keys, and cross-field
+rules before one atomic activation. Invalid candidates leave the active snapshot
+unchanged. The previous known-good snapshot remains available for rollback.</p>
+<h2>Time and persistence</h2>
+<p><code>TrustedTimeService</code> accepts only verified, fresh, non-replayed proofs, then advances
+from a monotonic clock. Protected decisions such as paid entitlement expiry, streaks,
+competitive seasons, and authoritative reward claims should not use device wall time.</p>
+<p><code>SecureSaveJournal</code> appends protected revisions, verifies a checksum before opening,
+quarantines corrupt or newer-schema entries, and recovers the newest valid historical
+revision. A platform adapter supplies atomic storage and authenticated protection.</p>
+<h2>Offline commands</h2>
+<p><code>OfflineOutbox</code> requires both a unique item ID and idempotency key, enforces item/byte
+limits without silently evicting evidence, orders by priority and age, tracks retry
+state, and removes expired commands. Servers must still enforce the same idempotency key.</p>
+<h2>Commerce</h2>
+<p>CommerceV2 models purchase, verification, fulfillment, acknowledgement, completion,
+refund, revocation, entitlement, and reconciliation as legal state transitions keyed
+by transaction/evidence identity. Rewarded ads bind server-verification evidence to a
+specific attempt. Promotions use opaque server campaigns and server-derived digests;
+the player contains no reusable reward table or validation secret.</p>
+<p>The existing <code>IAPBridge</code> remains the compatibility facade. In Production it blocks
+when the store SDK, receipt authority, or safe validation policy is missing.</p>
+<h2>Player data and meta systems</h2>
+<p>PlayerDataV2 registers every persistent section with a schema and merge policy, uses
+expected revisions for conditional writes, and surfaces unsafe conflicts instead of
+guessing. Account/device migration, tombstones, export/deletion lifecycle, and resumable
+sync checkpoints are explicit domain states.</p>
+<p>MetaV2 provides authority-aware player profiles, achievements, calendar/streak rules,
+append-only economy/inventory mutations, exactly-once inbox claims, tournaments/leagues,
+and referral lifecycles. The local simulator permanently reports prototype authority.</p>
+<h2>Identity and credential broker</h2>
+<p>IdentityV2 models Google, Apple, platform, Facebook, Steam, Xbox, email-link,
+passkey, and generic OIDC capabilities without exposing provider tokens to game code.
+Authorization flows bind PKCE, state, nonce, exact redirect policy, initiating session,
+and one-time backend exchange codes. Native, loopback, and WebGL redirects have distinct
+exact-match policies; wildcard origins and embedded client secrets are rejected.
+Session rotation/revocation, incremental scope verification, offline-resume limits,
+step-up evidence, account-link collision previews, unlink, and merge previews are
+explicit. Deterministic proof validators are local prototypes only; a production
+adapter must verify issuer, audience, signature, nonce, time, account mapping, and replay
+at the customer-owned backend.</p>
+<h2>Content, LiveOps, progression, and community</h2>
+<p>ContentV2 uses versioned catalog compatibility, dependency order, hash/signature
+verification seams, bounded LRU/pinning, resumable staging, atomic activation/rollback,
+locale fallback, plural/select rules, RTL metadata, pseudolocalization, and missing-key
+diagnostics.</p>
+<p>LiveOpsV2 supplies immutable event windows, overlap/gate checks, approval-aware publish,
+audience and sticky experiment evaluation, quest/pass claims, retention journey caps,
+quiet hours, and event watchdog evidence. ProgressionV2 adds exact loot-probability
+disclosure, eligibility-before-RNG, replay-stable pity, atomic crafting, collections,
+upgrades, mastery, and prestige. SocialV2 covers friends/blocks/presence, invites/gifts,
+clubs, moderated chat/reporting, parties/matchmaking, and anti-cheat evidence. All local
+randomness and community authorities identify themselves as non-production simulation.</p>
+<h2>Import-survival migration</h2>
+<p>Use <strong>Tools &gt; HLK &gt; Migration &gt; Pre-Upgrade Backup and Scan...</strong> before importing an update over an existing asset.
+The scanner inventories settings/config fingerprints and known PlayerPrefs key schemas,
+detects duplicate Assets/UPM installs, reports computed/unmapped keys, and emits a
+deterministic manifest. Backup and relocation are dry-run first, copy-if-missing,
+hash-bound, checkpointed, resumable, and refuse existing targets. Sensitive-marker
+assets are deliberately inventoried but not copied automatically; review and move them
+through an approved secret/config workflow.</p>
+<h2>Native and web surfaces</h2>
+<p>NativeV2 reports capability, access, gesture, authority, and offline semantics for
+dialogs, contacts, quick actions, updates, media, connectivity, background tasks,
+sharing, web views, and TV input. The secure web policy uses exact HTTPS origins,
+gesture-gated external actions, and bounded MIME/size rules.</p>
+<p><code>SecureLinkRouter</code> uses exact scheme/host/path routes, a query allowlist, bounded input,
+fresh signatures for privileged actions, and nonce replay protection. Signature and
+nonce values are not returned to game callbacks.</p>
+<h2>Privacy and operations</h2>
+<p><code>ConsentPolicyEngine</code> evaluates each processing purpose against age, tracking
+restrictions, and a revisioned consent snapshot. Unknown age/consent is conservative;
+essential processing remains distinct from analytics, attribution, ads, notifications,
+social graph, and UGC.</p>
+<p><code>DataPracticesReport</code> reconciles declared processing with endpoint inventory and
+deletion support. <code>DataRightsRequest</code> models identity verification, processing,
+completion artifacts, deadlines, cancellation, and idempotent completion.</p>
+<p>High-risk operator commands use explicit permissions, independent approvals, and an
+audited execution boundary. Clients may submit anti-abuse evidence but never adjudicate
+bans, grants, or authoritative competitive outcomes.</p>
+<h2>Testing and release evidence</h2>
+<p>Use the <strong>Complete V2</strong> Toolset tab to run Build Doctor, inspect modules, and open
+the shared showcase. Distributable validation/export and dependency repair are asset
+maintainer workflows under <strong>Tools &gt; HLK &gt; Maintainer</strong>. Canonical WebGL/Android
+showcase builders remain under <strong>Tools &gt; HLK &gt; V2</strong> and reject Unity Development
+builds. The Android lane
+injects only the native-sharing compile symbol into the player build, verifies the
+scoped <code>content://</code> provider configuration, and does not turn absent optional
+providers into simulated production success. It also checks for Unity's built-in
+Android JNI module. When a minimal host omitted that module, the first invocation
+adds it and stops with an explicit reload/rerun instruction; the next invocation
+builds after Unity has resolved the engine module.</p>
+<p>Run EditMode tests for deterministic domains and PlayMode tests for Unity lifecycle/UI.
+Run Android/iOS lanes with the actual provider SDKs and credentials for native, store,
+consent, attribution, notification, review, and sharing evidence. A headless pass proves
+contracts and integration behavior; it does not certify device SDK behavior.</p></html>

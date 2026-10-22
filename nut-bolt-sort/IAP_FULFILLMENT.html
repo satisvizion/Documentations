@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>HyperCasual LiveOps Kit guide</title><style>body{font:16px/1.65 system-ui;max-width:1000px;margin:40px auto;padding:0 24px;color:#17283b}pre{white-space:pre-wrap;background:#f1f5fa;padding:18px}table{border-collapse:collapse}td,th{border:1px solid #bbc;padding:8px}img{max-width:100%}</style><h1>IAP fulfillment: your choice</h1>
+<p>Open <strong>Tools &gt; HLK &gt; V2 &gt; Game Build Setup</strong>. Enable IAP Test or Production, install Unity IAP, assign your catalog and select a fulfillment button. Test uses a real store on device when UseFakeStoreOnDevice is off; only Play's account/distribution setup determines test billing.</p>
+<table>
+<thead>
+<tr>
+<th>Choice</th>
+<th>Required setup</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ClientSide</td>
+<td>Real store SDK, matching product IDs, reward hooks</td>
+<td>Delivers locally without custom receipt validation. No backend needed.</td>
+</tr>
+<tr>
+<td>LocalReceiptValidation</td>
+<td>Above plus Google Play licensing public key</td>
+<td>Official Unity IAP verifier checks signed Android Google Play receipt, product, transaction and purchased state before local delivery.</td>
+</tr>
+<tr>
+<td>ServerAuthoritative</td>
+<td>HTTPS validator, authenticated session and authoritative ledger</td>
+<td>Grants are committed by the server. No local fallback or duplicate local reward.</td>
+</tr>
+</tbody>
+</table>
+<p>ClientSide is supported in normal signed Release AAB builds. It is not a showcase bypass. Build Doctor warns about local trust rather than demanding a server. Selected but broken integrations still fail preflight. Never use dummy purchases as evidence of real billing.</p>
+<h2>Existing projects are preserved</h2>
+<p>New IAP Pro settings resolve to client-side fulfillment. Existing serialized <code>EnableServerValidation = true</code> settings continue resolving to server-authoritative through <code>LegacySettings</code>. Explicit fulfillment selection takes precedence over that legacy checkbox. Switching to ClientSide is deliberate; the builder never changes this choice or erases endpoints.</p>
+<h2>Deliver first, acknowledge afterward</h2>
+<p>Local delivery requires a transaction ID and reward hook. A device-local journal tracks pending/delivered transactions. Built-in currency rewards persist the currency balance and processed credit IDs together. Restore recovers receipt-bearing pending orders (including consumables) through the same fulfillment gate; confirmed consumables are not re-granted. Store acknowledgement happens only after successful delivery. Confirmation failures leave store recovery available.</p>
+<p>The journal is duplicate protection, not fraud protection. Clearing app data, tampering, reinstalling, switching devices, or a storage failure can defeat device-local history. Server authority is recommended for valuable economies and cross-device accounting. Local signature verification does not continuously detect refunds or revoked entitlements.</p>
+<p>Use purchase reward hooks for fulfillment. Purchase events are notifications and may repeat during recovery: do not separately grant currency from those events.</p>
+<h2>Custom rewards and recovery</h2>
+<p>Custom hooks must throw if delivery fails, not silently return. Hooks implementing <code>IIdempotentPurchaseReward</code> promise durable transaction-keyed idempotency: use <code>PurchaseGrantContext.TransactionId</code>, commit before returning, and handle replay without another grant. Composite hooks receive distinct child keys. Do not reorder composite children while purchases are pending.</p>
+<p>If a non-idempotent custom hook is interrupted after the pending journal write, automatic replay stops for reconciliation rather than risk a second grant. Investigate the transaction and reward state, repair the hook or reconcile through your own support tooling. Do not blindly delete pending journal entries. This asset does not provide a universal reconciliation backend for arbitrary custom rewards.</p>
+<h2>Subscriptions</h2>
+<p>Basic local fulfillment is intended for consumables and non-consumables. Real subscription grants require an unexpired store-provided expiry through <code>IStoreBackend.TryGetProductInfo</code>; the current Unity IAP adapter does not expose that expiry. Therefore use the authoritative server integration or a custom backend supplying verified expiry for subscription fulfillment. HLK does not invent a renewal period from an authored demo duration for a real purchase. Missing expiry keeps a local subscription pending instead of acknowledging an undelivered entitlement.</p>
+<h2>Local Google Play verification</h2>
+<p>Use the Google Play licensing <strong>PUBLIC</strong> key, never a service-account/private key. The built-in verifier is Android-device-only; the Editor and other platforms return inconclusive instead of simulated approval. Apps requiring other local verifiers can register <code>ILocalReceiptValidator</code> with HLK services and must supply platform-specific setup/preflight support. A generic server <code>IReceiptValidator</code> is not substituted for a local verifier.</p>
+<p>The adapter was checked against Unity IAP 5.4.3. Verification failure or mismatched evidence leaves the transaction unacknowledged. A base64 key passing editor checks is not proof that it matches your app: test a Play-distributed licensed purchase on a real device.</p>
+<h2>Minimum device acceptance checklist</h2>
+<ol>
+<li>Build a signed, non-development AAB through <strong>Build Game AAB (Google Play)</strong> with only needed modules enabled.</li>
+<li>Distribute using your Play test track, approved product IDs and license testers. Confirm the native store dialog.</li>
+<li>Complete/cancel/defer a purchase. Confirm cancellation never grants, success grants once and pending approval does not grant early.</li>
+<li>Relaunch/recover around delivery and acknowledgement. Verify no duplicate currency and restored non-consumable access.</li>
+<li>For local signatures, test valid and deliberately wrong licensing keys. For server mode, test rejection/offline recovery and no client fallback.</li>
+<li>Verify restore, refunds/revocations and subscription lifecycle according to your selected architecture. Build and automated tests alone do not certify these store/device flows.</li>
+</ol></html>
