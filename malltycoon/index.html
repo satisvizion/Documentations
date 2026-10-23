@@ -1,0 +1,93 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Mall Tycoon — User Manual</title><style>body{font:16px/1.65 system-ui,sans-serif;margin:0;background:#f6f9fc;color:#173044}main{max-width:1060px;margin:auto;padding:40px 28px;background:white}h1,h2,h3{color:#103d56}h2{margin-top:2.2em;border-top:1px solid #d9e3eb;padding-top:20px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#eef4f8;padding:20px;border-radius:10px}code{font-size:.94em}a{color:#087f9c}li{margin:9px 0}table{border-collapse:collapse}td,th{border:1px solid #c8d7e1;padding:8px}</style><main><h1>Mall Tycoon</h1>
+<p>Version 1.0.0 · SatisVizion · Unity 6000.0.62f1 · URP 17.0.4</p>
+<p>Drag anywhere to walk using the virtual joystick. Stand behind counters to serve shoppers, collect cash, stand on purchase pads to open shops or hire helpers, and carry boxes from the stockroom to restock shelves.</p>
+<h2>First run</h2>
+<ol>
+<li>Install Unity <strong>6000.0.62f1</strong> in Unity Hub. For Android add matching Android Build Support, SDK, NDK and OpenJDK; for browser builds add WebGL Build Support.</li>
+<li>Open the supplied standalone project, or create a Unity 6 <strong>URP</strong> project before importing the buyer package. Required packages: URP <strong>17.0.4</strong>, uGUI <strong>2.0.0</strong>, Input System <strong>1.14.2</strong>, the standard Unity modules, <strong>ScreenCapture</strong> and <strong>AndroidJNI</strong>. The standalone project includes its manifest and lock file.</li>
+<li>Import all three asset roots: <strong>Assets/Games/MallTycoon</strong>, <strong>Assets/HyperCasualLiveOpsKit</strong> and <strong>Assets/TextMesh Pro</strong>. Keep every <code>.meta</code> file and the game's private <strong>Kit</strong> folder; it is required runtime code.</li>
+<li>Set Edit → Project Settings → Player → Other Settings → <strong>Active Input Handling = Both</strong> and restart Unity if prompted. Run <strong>Mall Tycoon → Setup</strong> after package import to select the supplied URP settings.</li>
+<li>Open <code>Assets/Games/MallTycoon/Scenes/MallTycoon_Mobile.unity</code> and press Play. This is the portrait scene. A landscape WebGL scene is also included; use the scene appropriate for your build. Much of the game UI and world are created at runtime.</li>
+</ol>
+<h2>Gameplay and content</h2>
+<p>Drag anywhere to walk using the virtual joystick. Stand behind counters to serve shoppers, collect cash, stand on purchase pads to open shops or hire helpers, and carry boxes from the stockroom to restock shelves.</p>
+<p>Shops, shopper queues, restocking, litter, staff, permanent upgrades, rank XP and guided level objectives. The simulation has no countdown loss timer.</p>
+<p>The source includes <strong>25 authored levels</strong> and seeded procedural continuation. Progress, settings and charges are stored locally with PlayerPrefs. Browser storage depends on the browser profile. The template includes source and editable level data; generated continuation is not advertised as hundreds of individually authored levels.</p>
+<h2>Boosters</h2>
+<ul>
+<li><strong>Roller Skates</strong> unlocks at level <strong>3</strong>.</li>
+<li><strong>Cash Magnet</strong> unlocks at level <strong>7</strong>.</li>
+<li><strong>Happy Tunes</strong> unlocks at level <strong>11</strong>.</li>
+<li><strong>Extra Hands</strong> unlocks at level <strong>15</strong>.</li>
+</ul>
+<p>First-use guidance introduces each booster. Availability depends on the level, current state and remaining charges. Rewarded placements are simulated by default; only a completed reward callback should grant a refill. Use the DEV panel to unlock boosters for authoring, not as a substitute for real progression testing.</p>
+<h2>Manual editor and generation</h2>
+<p>Open <strong>Mall Tycoon → Level Editor</strong>. Duplicate a level before changing the original tutorial. The authoring file is <code>Assets/Games/MallTycoon/Resources/malltycoon/Levels/levels.json</code>.</p>
+<p>Click a booth slot to place or cycle a shop type; right-click removes it. Select each shop to configure price, helper and stock. Set the level goal, target, rows, shopper patience, restocking, litter and starting economy. Keep the entrance and walking paths usable. Validate the actual simulation result before saving. Time values in authored data are simulation tuning/proof inputs; the shipped player flow has no countdown loss timer. Generated shifts continue after the authored campaign.</p>
+<p>The included editor supports saving, duplication and ordering, and provides generation and validation controls appropriate for this game. Read the actual validation result; a difficulty target is not a guarantee of player success. Use a repeatable seed when comparing generated variants. Test changed boards in Play mode.</p>
+<h3>First authored level schema</h3>
+<pre><code class="language-json">{
+  &quot;levels&quot;: [
+    {
+      &quot;name&quot;: &quot;Opening Day&quot;,
+      &quot;hint&quot;: &quot;Drag anywhere to walk.\nStand behind the counter to serve,\nthen grab the cash!&quot;,
+      &quot;goal&quot;: 0,
+      &quot;target&quot;: 25,
+      &quot;openShop&quot;: -1,
+      &quot;time&quot;: 150,
+      &quot;seed&quot;: 101,
+      &quot;rows&quot;: 2,
+      &quot;gap&quot;: 4,
+      &quot;patience&quot;: 50,
+      &quot;rush&quot;: &quot;&quot;,
+      &quot;vip&quot;: 0,
+      &quot;litter&quot;: 0,
+      &quot;startCoins&quot;: 0,
+      &quot;crate&quot;: false,
+      &quot;intro&quot;: 0,
+      &quot;breather&quot;: false,
+      &quot;difficulty&quot;: 0.02,
+      &quot;theme&quot;: 0,
+      &quot;pile&quot;: 20,
+      &quot;shops&quot;: [
+        {
+          &quot;type&quot;: 0,
+          &quot;side&quot;: -1,
+          &quot;row&quot;: 0,
+          &quot;price&quot;: 20,
+          &quot;helper&quot;: 0,
+          &quot;stock&quot;: 0
+        }
+      ]
+    }
+  ]
+}
+</code></pre>
+<h2>Customisation</h2>
+<p>Game logic is under <code>Scripts</code>; presentation and UI are in the game's Game partial classes. Artwork, sound effects, music and levels are under <code>Resources/malltycoon</code>. Shared UI, audio, ad and haptic helpers live in <code>Kit/Runtime</code>; font files and placements are under <code>Kit/Resources/malltycoon/kit</code>. Keep resource paths unless you update every matching code reference.</p>
+<p>Change Company Name, Product Name, Version and the Android application identifier in Player Settings to values you control. Do not publish under <code>com.satisvizion.malltycoon.demo</code>. Assign your own launcher/adaptive icon layers and review the splash screen, in-game title and other branding. Increase Android Bundle Version Code for each released update. Test UI fit, text and touch targets on an actual phone.</p>
+<h2>LiveOps, ads and haptics</h2>
+<p>The publisher-owned <strong>HyperCasual LiveOps Kit</strong> is included. <a href="HyperCasualLiveOpsKit.html">Read its complete offline manual</a>.</p>
+<p>Settings: <code>Assets/HyperCasualLiveOpsKit/Resources/HLK/HLKSettings.asset</code>. Shipping defaults are <strong>Ads Mode Dummy (0)</strong> and <strong>IAP Mode Disabled (3)</strong>. Banner, interstitial and rewarded placements are simulations. <strong>No Google Mobile Ads, billing or other vendor SDK is included.</strong> Automatic vendor-SDK installers are disabled. The game's own Kit is required code, not an advertising SDK.</p>
+<p>To enable a real provider, separately install its official SDK, follow the kit manual, configure your own identifiers, consent and privacy policy, then test the selected platform and all cancellation/failure cases. Do not enable SDK symbols without the corresponding dependency. Optional kit modules are capabilities, not production services already configured for this game. Native vibration needs a supported device; browser haptics and other native services have platform limits.</p>
+<h2>Development controls</h2>
+<p>Open DEV, press F2/backquote, or use the kit's top-left multi-tap shortcut. The global panel supports level jumps, booster access, ads and haptics controls. Add <code>HZ_RELEASE</code> to scripting defines when you want these development controls excluded from a consumer build. This does not configure real ads or certify store readiness.</p>
+<h2>Android release</h2>
+<p>Use the Mobile scene, portrait orientation and ARM64/IL2CPP with matching Unity tools. The provided APK is a <strong>debug-signed development demo</strong>, not a production store release. For release turn off Development Build and debugging, choose your own application identifier and review current store API requirements.</p>
+<p>In Player → Publishing Settings create or select <strong>your own keystore and alias</strong>. Securely retain the keystore, alias and passwords for future updates; never redistribute signing secrets. Enable Build App Bundle for a Google Play AAB. Install a release candidate on a physical Android device and check touch, audio, haptics, pause/resume, saves and any enabled provider flows. Complete destination-store ads/data declarations and your privacy policy for the services actually enabled.</p>
+<h2>WebGL</h2>
+<p>Build the Mobile scene for a portrait-only demo with the built-in Default template and Brotli decompression fallback. Use <strong>Mall Tycoon → Create Responsive WebGL Page</strong> after building and select the output folder. This generates an original responsive page around the complete Build folder. Serve every loader, framework, data and WASM file over HTTP(S); <code>file://</code> is unsupported. Audio normally starts after a first click/tap.</p>
+<p>The two-scene landscape-first route supports <code>?mobile=1</code> to switch to the following Mobile scene. The included WebGL build menu uses HLK's non-development <strong>local showcase</strong> scope. It supports simulated demos; configure your production providers and resolve the kit build-doctor checks for a real service release.</p>
+<h2>Troubleshooting</h2>
+<ul>
+<li>Missing types: install the required packages and import all three roots, preserving <code>.meta</code> files.</li>
+<li>Pointer input exception: select Active Input Handling Both and restart Unity.</li>
+<li>Pink materials: use URP 17.0.4 and run the game's Setup command.</li>
+<li>Sparse scene in edit mode: world/UI objects are built at runtime; press Play.</li>
+<li>No real ad revenue: Dummy mode is simulated and no provider SDK is bundled.</li>
+<li>IAP is unavailable: it is deliberately Disabled by default; configure an official billing integration separately if you need it.</li>
+<li>Progress persists: use the development reset controls or deliberately clear this product's PlayerPrefs.</li>
+<li>WebGL does not load from a local file: serve the complete output over HTTP(S).</li>
+</ul>
+<h2>Licences and support</h2>
+<p>Retain the font, icon, TextMesh Pro and HLK licences and Third-Party Notices. See the game's <code>Third-Party Notices.txt</code> and <code>AI-DISCLOSURE.txt</code>. Marketing artwork is distinct from authentic gameplay captures. For product support use the marketplace item support channel or contact SatisVizion at satisvizion@gmail.com.</p></main></html>
