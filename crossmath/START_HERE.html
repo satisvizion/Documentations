@@ -61,11 +61,7 @@ when one exists. The categories mean:</p>
 <p>Configure only what the game needs. Dummy, Test, Simulated, and LocalPrototype
 paths are development tools. Explicit Production/provider paths do not silently
 turn into successful simulation when a required SDK or authority is absent.</p>
-<p>For AdMob, open the <strong>Ads</strong> tab, expand <strong>Google AdMob — direct</strong>, and select
-<strong>Install AdMob SDK</strong>. After confirmation, HLK adds the official OpenUPM registry
-and its tested Google Mobile Ads UPM dependency; no OpenUPM CLI or manual scoped-
-registry entry is required. The installer refuses to mix a legacy <code>.unitypackage</code>
-copy with UPM and keeps a backup of the previous manifest under <code>Library</code>.</p>
+<p><strong>Standalone game delivery:</strong> automatic vendor-SDK installation is disabled and no provider SDK is bundled. Shipping defaults are Ads Dummy (0) and IAP Disabled (3). To enable real AdMob ads, separately install the official Google Mobile Ads SDK using the vendor documentation, configure your own Android App ID, placement IDs, consent and provider settings, then perform device testing. Do not mix legacy unitypackage and UPM copies.</p>
 <h2>4. Clear local blockers</h2>
 <p>For the Remote Config tutorial, keep <strong>Fetch automatically on init</strong> enabled,
 publish a parameter, then restart the app / Play Mode and inspect active values.

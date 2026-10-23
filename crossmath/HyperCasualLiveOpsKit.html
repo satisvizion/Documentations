@@ -1095,11 +1095,7 @@ ads.HideBanner();</div>
   overlay in-engine — no SDK at all), <code>Test</code> (real SDK, test units), or
   <code>Production</code>. <code>AdsDiagnosticsOverlay</code> can be toggled in development builds to
   watch fill, pacing decisions, and revenue callbacks live.</p>
-  <div class="hint"><strong>Guided AdMob install:</strong> open the <strong>Ads</strong> tab, expand
-  <strong>Google AdMob — direct</strong>, and select <strong>Install AdMob SDK</strong>. After confirmation,
-  HLK adds the official OpenUPM registry and its pinned, tested Google Mobile Ads dependency, then asks
-  Unity Package Manager to resolve it. The installer detects legacy/custom copies and refuses to create
-  a mixed installation.</div>
+  <div class="hint"><strong>Standalone game delivery:</strong> automatic vendor-SDK installation is disabled and no provider SDK is bundled. Shipping defaults are Ads Dummy (0) and IAP Disabled (3). To enable real AdMob ads, separately install the official Google Mobile Ads SDK using the vendor documentation, configure your own Android App ID, placement IDs, consent and provider settings, then perform device testing. Do not mix legacy unitypackage and UPM copies.</div>
   <div class="warn-hint"><strong>AdMob: set your App ID before building.</strong> Enter your real AdMob
   <em>App ID</em> in <strong>Assets ▸ Google Mobile Ads ▸ Settings</strong> before you build — a missing or
   left-in sample App ID crashes the app at launch. Per-placement <em>unit ids</em> and the App IDs are

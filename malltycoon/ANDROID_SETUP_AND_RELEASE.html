@@ -22,7 +22,7 @@
 <tbody>
 <tr>
 <td>AdMob direct</td>
-<td>On <strong>Tools ▸ HyperCasual LiveOps Kit ▸ Complete Setup ▸ Ads</strong>, expand <strong>Google AdMob — direct</strong> and select <strong>Install AdMob SDK</strong>. The guided installer adds the official OpenUPM registry plus HLK's tested Google Mobile Ads package version. Then set the Android AdMob app ID in <strong>Assets ▸ Google Mobile Ads ▸ Settings</strong>. Legacy <code>.unitypackage</code> installs remain supported but must not be mixed with UPM.</td>
+<td><strong>Standalone game delivery:</strong> automatic vendor-SDK installation is disabled and no provider SDK is bundled. Shipping defaults are Ads Dummy (0) and IAP Disabled (3). To enable real AdMob ads, separately install the official Google Mobile Ads SDK using the vendor documentation, configure your own Android App ID, placement IDs, consent and provider settings, then perform device testing. Do not mix legacy unitypackage and UPM copies.</td>
 <td>automatic SDK marker or <code>HLK_ADMOB</code></td>
 <td>Android app ID and rewarded/interstitial/banner production IDs; SDK marker</td>
 </tr>
