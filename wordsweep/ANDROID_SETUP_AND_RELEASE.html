@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>HyperCasual LiveOps Kit guide</title><style>body{font:16px/1.65 system-ui;max-width:1000px;margin:40px auto;padding:0 24px}pre{white-space:pre-wrap;background:#eef3f8;padding:18px}table{border-collapse:collapse}td,th{border:1px solid #bbc;padding:8px}img{max-width:100%}</style><h1>Android setup and release readiness (Unity 6000.0.62f1)</h1>
-<p>This is the Android customer path after importing HLK into a clean Unity 6 URP project. “Build Doctor passes” means only that locally inspectable evidence is coherent. It cannot certify provider-console state, store products, signing fingerprints, consent-message publication, ad serving, device delivery, or Google Play review.</p>
+<p>This is the Android customer path after importing HLK into a clean Unity 6 URP project. "Build Doctor passes" means only that locally inspectable evidence is coherent. It cannot certify provider-console state, store products, signing fingerprints, consent-message publication, ad serving, device delivery, or Google Play review.</p>
 <h2>1. Establish the Android player identity</h2>
 <ol>
 <li>Switch the editor to Android before adding target-specific defines.</li>
@@ -84,7 +84,7 @@
 <td>Firebase Remote Config / Crashlytics</td>
 <td>Corresponding Firebase Unity SDK</td>
 <td>automatic provider marker</td>
-<td>Firebase file/package plus the module’s generic SDK status</td>
+<td>Firebase file/package plus the module's generic SDK status</td>
 </tr>
 <tr>
 <td>Native sharing</td>
@@ -130,7 +130,7 @@
 </tr>
 </tbody>
 </table>
-<p>For Firebase, download the Android app’s <code>google-services.json</code> and place it exactly at <code>Assets/google-services.json</code>. The build check parses only <code>client_info.android_client_info.package_name</code>, compares it to Player Settings, and never prints config values. Firebase’s setup guide explains the platform file and Google Services processing: <a href="https://firebase.google.com/docs/unity/setup">https://firebase.google.com/docs/unity/setup</a>.</p>
+<p>For Firebase, download the Android app's <code>google-services.json</code> and place it exactly at <code>Assets/google-services.json</code>. The build check parses only <code>client_info.android_client_info.package_name</code>, compares it to Player Settings, and never prints config values. Firebase's setup guide explains the platform file and Google Services processing: <a href="https://firebase.google.com/docs/unity/setup">https://firebase.google.com/docs/unity/setup</a>.</p>
 <p>Android 13/API 33 and newer require runtime <code>POST_NOTIFICATIONS</code> permission for non-exempt notifications. HLK warns when both notification auto-request options are off; an intentional, app-owned request flow is also valid and must be tested: <a href="https://developer.android.com/develop/ui/views/notifications/notification-permission">https://developer.android.com/develop/ui/views/notifications/notification-permission</a>.</p>
 <h2>3. Manifest, dependency and minification verification</h2>
 <p>After resolving Android dependencies, export a Gradle project or build an AAB and inspect the <strong>merged</strong> application manifest, dependency graph, and mapping output. Source-file presence is not proof of a successful merge.</p>
@@ -138,8 +138,8 @@
 <li>Confirm the FileProvider authority resolves to <code>&lt;applicationId&gt;.hlk.sharefiles</code>, <code>exported=false</code>, <code>grantUriPermissions=true</code>, and the paths resource exposes only <code>cache-path</code>.</li>
 <li>Confirm sharing an actual screenshot produces a <code>content://</code> URI and the receiving app can read it. Attachment failure must surface as a failure; it must not silently fall back to text-only sharing.</li>
 <li>Confirm <code>android.permission.VIBRATE</code> and the notification/advertising permissions required by the chosen SDK versions appear in the merged manifest. Do not add unrelated permissions pre-emptively.</li>
-<li>If minification is enabled, confirm the androidlib’s <code>consumerProguardFiles</code> is applied and <code>dev.hce.sharing.HlkShareBridge</code> remains in the release artifact.</li>
-<li>Run External Dependency Manager resolution and verify <code>review:2.0.2</code> and, when selected, <code>app-update:2.1.0</code>. Provider SDKs may impose newer minimum SDKs than HLK’s base library.</li>
+<li>If minification is enabled, confirm the androidlib's <code>consumerProguardFiles</code> is applied and <code>dev.hce.sharing.HlkShareBridge</code> remains in the release artifact.</li>
+<li>Run External Dependency Manager resolution and verify <code>review:2.0.2</code> and, when selected, <code>app-update:2.1.0</code>. Provider SDKs may impose newer minimum SDKs than HLK's base library.</li>
 </ul>
 <h2>4. Preflight and tests</h2>
 <p>PowerShell examples (adjust the Unity path if Hub is installed elsewhere):</p>
@@ -156,6 +156,6 @@ $project = 'C:\path\to\your\clean-import-project'
   -testResults Artifacts/hlk-android-readiness.xml `
   -logFile Artifacts/hlk-android-readiness.log
 </code></pre>
-<p>The package’s showcase build is a local sample/simulator artifact and deliberately uses a scoped non-production doctor profile. It is not a store-release certification. After the production doctor passes, invoke the game’s own CI build method without the showcase scope, create a signed AAB, run Play pre-launch reports, and execute real-device tests for sign-in, purchases (license testers), ads test devices, consent-region variants, notification permission states, cold-start push/deep links, share attachments, WebView allow-list behavior, Saved Games conflicts, attribution deep links, review/update eligibility, process death, offline recovery, and account switching.</p>
+<p>The package's showcase build is a local sample/simulator artifact and deliberately uses a scoped non-production doctor profile. It is not a store-release certification. After the production doctor passes, invoke the game's own CI build method without the showcase scope, create a signed AAB, run Play pre-launch reports, and execute real-device tests for sign-in, purchases (license testers), ads test devices, consent-region variants, notification permission states, cold-start push/deep links, share attachments, WebView allow-list behavior, Saved Games conflicts, attribution deep links, review/update eligibility, process death, offline recovery, and account switching.</p>
 <h2>5. Expected failure behavior</h2>
 <p>Explicit production/native selections must fail closed when their dependency is missing. Dummy/simulated modes remain useful for editor and QA. A successful dummy operation is never provider evidence. Build Doctor findings use stable <code>HLKA###</code> rule IDs and become blockers only in the production profile; the Android 13 notification prompt timing rule remains a warning because applications may own that UX outside HLK.</p></html>
