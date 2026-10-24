@@ -1,0 +1,161 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>HyperCasual LiveOps Kit guide</title><style>body{font:16px/1.65 system-ui;max-width:1000px;margin:40px auto;padding:0 24px}pre{white-space:pre-wrap;background:#eef3f8;padding:18px}table{border-collapse:collapse}td,th{border:1px solid #bbc;padding:8px}img{max-width:100%}</style><h1>Android setup and release readiness (Unity 6000.0.62f1)</h1>
+<p>This is the Android customer path after importing HLK into a clean Unity 6 URP project. “Build Doctor passes” means only that locally inspectable evidence is coherent. It cannot certify provider-console state, store products, signing fingerprints, consent-message publication, ad serving, device delivery, or Google Play review.</p>
+<h2>1. Establish the Android player identity</h2>
+<ol>
+<li>Switch the editor to Android before adding target-specific defines.</li>
+<li>In Player Settings, set the final reverse-DNS application ID. Use the same ID in Firebase, Google Play Console, Play Games Services, ads dashboards, and <code>HLKSettings.RateUs.AndroidPackageName</code>.</li>
+<li>Enable ARM64. Set Target API Level explicitly to API 36 or newer and install that SDK through Unity Hub. As of 31 August 2026, new Google Play apps and updates must target Android 16/API 36: <a href="https://support.google.com/googleplay/android-developer/answer/11926878">https://support.google.com/googleplay/android-developer/answer/11926878</a>.</li>
+<li>Keep <code>com.unity.modules.androidjni</code>, <code>com.unity.modules.unitywebrequest</code>, and the modules used by your chosen features in <code>Packages/manifest.json</code>.</li>
+<li>Configure production keystore/signing outside the package. Do not store passwords, service-account JSON, store secrets, or receipt-validation secrets in Unity assets or source control.</li>
+</ol>
+<p>The bundled Android library declares <code>minSdk 23</code>, <code>compileSdk 36</code>, <code>targetSdk 36</code>, <code>VIBRATE</code>, and an app-scoped, non-exported <code>FileProvider</code>. The consuming application still controls the final merged manifest and player SDK levels.</p>
+<h2>2. Provider matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Feature selected in HLK</th>
+<th>Customer-installed dependency/config</th>
+<th>Android define</th>
+<th>Build Doctor checks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AdMob direct</td>
+<td>On <strong>Tools ▸ HyperCasual LiveOps Kit ▸ Complete Setup ▸ Ads</strong>, expand <strong>Google AdMob — direct</strong> and select <strong>Install AdMob SDK</strong>. The guided installer adds the official OpenUPM registry plus HLK's tested Google Mobile Ads package version. Then set the Android AdMob app ID in <strong>Assets ▸ Google Mobile Ads ▸ Settings</strong>. Legacy <code>.unitypackage</code> installs remain supported but must not be mixed with UPM.</td>
+<td>automatic SDK marker or <code>HLK_ADMOB</code></td>
+<td>Android app ID and rewarded/interstitial/banner production IDs; SDK marker</td>
+</tr>
+<tr>
+<td>LevelPlay</td>
+<td>LevelPlay Unity package and mediated network adapters</td>
+<td>automatic SDK marker or <code>HLK_LEVELPLAY</code></td>
+<td>Android app key; SDK marker</td>
+</tr>
+<tr>
+<td>AppLovin MAX</td>
+<td>MAX Unity plugin and adapters</td>
+<td><code>HLK_APPLOVIN</code> where not supplied automatically</td>
+<td>SDK key and Android rewarded/interstitial/banner IDs; SDK marker</td>
+</tr>
+<tr>
+<td>Unity Ads direct</td>
+<td>Advertisement package/provider</td>
+<td>automatic SDK marker or <code>HLK_UNITY_ADS</code></td>
+<td>Android game ID, SDK marker, production test-mode off</td>
+</tr>
+<tr>
+<td>IAP</td>
+<td><code>com.unity.purchasing</code>; products duplicated exactly in Play Console</td>
+<td>automatic <code>HLK_UNITY_IAP</code></td>
+<td>catalog and compile path; server-authoritative validation is checked by IAP Pro</td>
+</tr>
+<tr>
+<td>Consent</td>
+<td>Google UMP (normally through Google Mobile Ads); publish the UMP message in AdMob</td>
+<td><code>HLK_UMP</code></td>
+<td>UMP marker and HTTPS privacy URL</td>
+</tr>
+<tr>
+<td>Local notifications</td>
+<td><code>com.unity.mobile.notifications</code></td>
+<td>automatic <code>HLK_MOBILE_NOTIFICATIONS</code></td>
+<td>SDK marker and whether a built-in permission request is configured</td>
+</tr>
+<tr>
+<td>Push</td>
+<td>Firebase Messaging Unity SDK</td>
+<td>automatic <code>HLK_FIREBASE_MESSAGING</code></td>
+<td>SDK marker, Firebase file, package match, Android 13+ permission path</td>
+</tr>
+<tr>
+<td>Play Games sign-in/leaderboards</td>
+<td>Official Google Play Games plugin; configure OAuth/signing fingerprints and generated resources</td>
+<td><code>HLK_PLAY_GAMES_SERVICES</code></td>
+<td>plugin type, Android-target define, leaderboard ID</td>
+</tr>
+<tr>
+<td>Play Games Saved Games</td>
+<td>Enable Saved Games in the same Play Games project</td>
+<td><code>HLK_PLAY_GAMES_SAVE</code></td>
+<td>plugin and saved-game define; console enablement remains manual</td>
+</tr>
+<tr>
+<td>Firebase Remote Config / Crashlytics</td>
+<td>Corresponding Firebase Unity SDK</td>
+<td>automatic provider marker</td>
+<td>Firebase file/package plus the module’s generic SDK status</td>
+</tr>
+<tr>
+<td>Native sharing</td>
+<td>Bundled bridge and androidlib</td>
+<td><code>HLK_NATIVE_SHARE</code></td>
+<td>JNI, cache-scoped FileProvider, URI grants, consumer R8 keep rule</td>
+</tr>
+<tr>
+<td>Haptics</td>
+<td>Bundled bridge; no vendor SDK</td>
+<td>none</td>
+<td>JNI and merged-source <code>VIBRATE</code> evidence</td>
+</tr>
+<tr>
+<td>Native WebView</td>
+<td>UniWebView supplied by the customer</td>
+<td><code>HLK_NATIVE_WEBVIEW</code></td>
+<td>define and provider type</td>
+</tr>
+<tr>
+<td>Deep links / App Links</td>
+<td>No SDK for manifest intent filters; host <code>assetlinks.json</code> externally</td>
+<td>none</td>
+<td>scheme/host syntax and manifest processor</td>
+</tr>
+<tr>
+<td>AppsFlyer attribution</td>
+<td>AppsFlyer Unity SDK</td>
+<td>automatic <code>HLK_APPSFLYER</code></td>
+<td>developer key, SDK marker, sandbox off in production</td>
+</tr>
+<tr>
+<td>Play in-app updates</td>
+<td>External Dependency Manager resolves <code>com.google.android.play:app-update:2.1.0</code></td>
+<td><code>HLK_PLAY_APP_UPDATE</code></td>
+<td>dependency declaration and Android-target define</td>
+</tr>
+<tr>
+<td>In-app review</td>
+<td>External Dependency Manager resolves <code>com.google.android.play:review:2.0.2</code></td>
+<td>none</td>
+<td>generic rate/review mode and exact Android package identity</td>
+</tr>
+</tbody>
+</table>
+<p>For Firebase, download the Android app’s <code>google-services.json</code> and place it exactly at <code>Assets/google-services.json</code>. The build check parses only <code>client_info.android_client_info.package_name</code>, compares it to Player Settings, and never prints config values. Firebase’s setup guide explains the platform file and Google Services processing: <a href="https://firebase.google.com/docs/unity/setup">https://firebase.google.com/docs/unity/setup</a>.</p>
+<p>Android 13/API 33 and newer require runtime <code>POST_NOTIFICATIONS</code> permission for non-exempt notifications. HLK warns when both notification auto-request options are off; an intentional, app-owned request flow is also valid and must be tested: <a href="https://developer.android.com/develop/ui/views/notifications/notification-permission">https://developer.android.com/develop/ui/views/notifications/notification-permission</a>.</p>
+<h2>3. Manifest, dependency and minification verification</h2>
+<p>After resolving Android dependencies, export a Gradle project or build an AAB and inspect the <strong>merged</strong> application manifest, dependency graph, and mapping output. Source-file presence is not proof of a successful merge.</p>
+<ul>
+<li>Confirm the FileProvider authority resolves to <code>&lt;applicationId&gt;.hlk.sharefiles</code>, <code>exported=false</code>, <code>grantUriPermissions=true</code>, and the paths resource exposes only <code>cache-path</code>.</li>
+<li>Confirm sharing an actual screenshot produces a <code>content://</code> URI and the receiving app can read it. Attachment failure must surface as a failure; it must not silently fall back to text-only sharing.</li>
+<li>Confirm <code>android.permission.VIBRATE</code> and the notification/advertising permissions required by the chosen SDK versions appear in the merged manifest. Do not add unrelated permissions pre-emptively.</li>
+<li>If minification is enabled, confirm the androidlib’s <code>consumerProguardFiles</code> is applied and <code>dev.hce.sharing.HlkShareBridge</code> remains in the release artifact.</li>
+<li>Run External Dependency Manager resolution and verify <code>review:2.0.2</code> and, when selected, <code>app-update:2.1.0</code>. Provider SDKs may impose newer minimum SDKs than HLK’s base library.</li>
+</ul>
+<h2>4. Preflight and tests</h2>
+<p>PowerShell examples (adjust the Unity path if Hub is installed elsewhere):</p>
+<pre><code class="language-powershell">$unity = 'C:\Program Files\Unity\Hub\Editor\6000.0.62f1\Editor\Unity.exe'
+$project = 'C:\path\to\your\clean-import-project'
+
+&amp; $unity -batchmode -nographics -quit -projectPath $project -buildTarget Android `
+  -executeMethod HLK.Editor.HlkV2BuildDoctor.RunBatch --hlk-production `
+  --hlk-output Artifacts/HLK-Android-Doctor -logFile Artifacts/hlk-android-doctor.log
+
+&amp; $unity -batchmode -nographics -quit -projectPath $project -buildTarget Android `
+  -runTests -testPlatform EditMode `
+  -testFilter HLK.Tests.EditorV2.HlkAndroidReadinessTests `
+  -testResults Artifacts/hlk-android-readiness.xml `
+  -logFile Artifacts/hlk-android-readiness.log
+</code></pre>
+<p>The package’s showcase build is a local sample/simulator artifact and deliberately uses a scoped non-production doctor profile. It is not a store-release certification. After the production doctor passes, invoke the game’s own CI build method without the showcase scope, create a signed AAB, run Play pre-launch reports, and execute real-device tests for sign-in, purchases (license testers), ads test devices, consent-region variants, notification permission states, cold-start push/deep links, share attachments, WebView allow-list behavior, Saved Games conflicts, attribution deep links, review/update eligibility, process death, offline recovery, and account switching.</p>
+<h2>5. Expected failure behavior</h2>
+<p>Explicit production/native selections must fail closed when their dependency is missing. Dummy/simulated modes remain useful for editor and QA. A successful dummy operation is never provider evidence. Build Doctor findings use stable <code>HLKA###</code> rule IDs and become blockers only in the production profile; the Android 13 notification prompt timing rule remains a warning because applications may own that UX outside HLK.</p></html>
