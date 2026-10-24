@@ -1,0 +1,121 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Ball Breaker Physics — User Manual</title><style>body{font:16px/1.65 system-ui,sans-serif;margin:0;background:#f6f9fc;color:#173044}main{max-width:1060px;margin:auto;padding:40px 28px;background:white}h1,h2,h3{color:#103d56}h2{margin-top:2.2em;border-top:1px solid #d9e3eb;padding-top:20px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#eef4f8;padding:20px;border-radius:10px}code{font-size:.94em}a{color:#087f9c}li{margin:9px 0}table{border-collapse:collapse}td,th{border:1px solid #c8d7e1;padding:8px}</style><main><h1>Ball Breaker Physics</h1>
+<p>Version 1.0.0 · SatisVizion · Unity 6000.0.62f1 · URP 17.0.4</p>
+<p>Drag down from the launcher to aim and release a volley of balls. Reduce numbered shapes to zero. Shapes rise after each volley; clear them before they reach the top danger line.</p>
+<h2>First run</h2>
+<ol>
+<li>Install Unity <strong>6000.0.62f1</strong> in Unity Hub. For Android add matching Android Build Support, SDK, NDK and OpenJDK; for browser builds add WebGL Build Support.</li>
+<li>Open the supplied standalone project, or create a Unity 6 <strong>URP</strong> project before importing the buyer package. Required packages: URP <strong>17.0.4</strong>, uGUI <strong>2.0.0</strong>, Input System <strong>1.14.2</strong>, the standard Unity modules, <strong>ScreenCapture</strong> and <strong>AndroidJNI</strong>. The standalone project includes its manifest and lock file.</li>
+<li>Import the complete product folder. Keep its required subfolders together: <strong>Assets/SatisVizionBallBreaker/Games/BallBreaker</strong>, <strong>Assets/SatisVizionBallBreaker/HyperCasualLiveOpsKit</strong> and <strong>Assets/SatisVizionBallBreaker/TextMesh Pro</strong>. Keep every <code>.meta</code> file and the game's private <strong>Kit</strong> folder; it is required runtime code.</li>
+<li>Set Edit → Project Settings → Player → Other Settings → <strong>Active Input Handling = Both</strong> and restart Unity if prompted. Run <strong>Tools → Ball Breaker Physics → Setup</strong> after package import to select the supplied URP settings.</li>
+<li>Open <code>Assets/SatisVizionBallBreaker/Games/BallBreaker/Scenes/BallBreaker_Mobile.unity</code> and press Play. This is the portrait scene. A landscape WebGL scene is also included; use the scene appropriate for your build. Much of the game UI and world are created at runtime.</li>
+</ol>
+<h2>Gameplay and content</h2>
+<p>Drag down from the launcher to aim and release a volley of balls. Reduce numbered shapes to zero. Shapes rise after each volley; clear them before they reach the top danger line.</p>
+<p>Deterministic fixed-step ball simulation, numbered neon shapes, rising rows, aiming guidance, volley budgets and authored difficulty progression.</p>
+<p>The source includes <strong>25 authored levels</strong> and seeded procedural continuation. Progress, settings and charges are stored locally with PlayerPrefs. Browser storage depends on the browser profile. The template includes source and editable level data; generated continuation is not advertised as hundreds of individually authored levels.</p>
+<h2>Boosters</h2>
+<ul>
+<li><strong>Zap</strong> unlocks at level <strong>4</strong>.</li>
+<li><strong>Push Back</strong> unlocks at level <strong>7</strong>.</li>
+<li><strong>Ball Burst</strong> unlocks at level <strong>11</strong>.</li>
+<li><strong>Quake</strong> unlocks at level <strong>16</strong>.</li>
+</ul>
+<p>First-use guidance introduces each booster. Availability depends on the level, current state and remaining charges. Rewarded placements are simulated by default; only a completed reward callback should grant a refill. Use the DEV panel to unlock boosters for authoring, not as a substitute for real progression testing.</p>
+<h2>Manual editor and generation</h2>
+<p>Open <strong>Tools → Ball Breaker Physics → Level Editor</strong>. Duplicate a level before changing the original tutorial. The authoring file is <code>Assets/SatisVizionBallBreaker/Games/BallBreaker/Resources/ballbreaker/Levels/levels.json</code>.</p>
+<p>The visual editor places numbered shapes and physics pieces on the board, and configures the level name, hints, ball/volley settings and progression. Preserve the launcher area and top danger line. The same fixed-step ball simulation drives the aim guide, bot, generator and authoring checks. For a first edit, select a non-tutorial level, Dup, rename the copy and reduce one numbered shape hit count within the positive range shown in the inspector. Validate the changed board, inspect the result, Save, then Play this level. Avoid placing an obstacle across the launcher or filling every escape path. Re-run Validate after moving a shape. Generation applies its seed and difficulty settings, then checks the simulated solving result before runtime delivery.</p>
+<p>The included editor supports saving, duplication and ordering, and provides generation and validation controls appropriate for this game. Read the actual validation result; a difficulty target is not a guarantee of player success. Use a repeatable seed when comparing generated variants. Test changed boards in Play mode.</p>
+<h3>First authored level schema</h3>
+<pre><code class="language-json">{
+  &quot;levels&quot;: [
+    {
+      &quot;name&quot;: &quot;First Drop&quot;,
+      &quot;hint&quot;: &quot;&quot;,
+      &quot;balls&quot;: 3,
+      &quot;par&quot;: 2,
+      &quot;breather&quot;: false,
+      &quot;layout&quot;: 0,
+      &quot;diff&quot;: 18.7,
+      &quot;pieces&quot;: [
+        {
+          &quot;kind&quot;: 0,
+          &quot;x&quot;: 0.53878415,
+          &quot;row&quot;: 3,
+          &quot;rot&quot;: 35,
+          &quot;hp&quot;: 2
+        },
+        {
+          &quot;kind&quot;: 0,
+          &quot;x&quot;: 4.5313416,
+          &quot;row&quot;: 3,
+          &quot;rot&quot;: 20,
+          &quot;hp&quot;: 1
+        },
+        {
+          &quot;kind&quot;: 0,
+          &quot;x&quot;: 6.5,
+          &quot;row&quot;: 3,
+          &quot;rot&quot;: 55,
+          &quot;hp&quot;: 1
+        },
+        {
+          &quot;kind&quot;: 0,
+          &quot;x&quot;: 1.9727069,
+          &quot;row&quot;: 2,
+          &quot;rot&quot;: 20,
+          &quot;hp&quot;: 2
+        },
+        {
+          &quot;kind&quot;: 0,
+          &quot;x&quot;: 3.0474348,
+          &quot;row&quot;: 2,
+          &quot;rot&quot;: 75,
+          &quot;hp&quot;: 2
+        },
+        {
+          &quot;kind&quot;: 0,
+          &quot;x&quot;: 3.9824421,
+          &quot;row&quot;: 2,
+          &quot;rot&quot;: 60,
+          &quot;hp&quot;: 2
+        },
+        {
+          &quot;kind&quot;: 0,
+          &quot;x&quot;: 6.031328,
+          &quot;row&quot;: 2,
+          &quot;rot&quot;: 60,
+          &quot;hp&quot;: 1
+        }
+      ]
+    }
+  ]
+}
+</code></pre>
+<h2>Customisation</h2>
+<p>Game logic is under <code>Scripts</code>; presentation and UI are in the game's Game partial classes. Artwork, sound effects, music and levels are under <code>Resources/ballbreaker</code>. Shared UI, audio, ad and haptic helpers live in <code>Kit/Runtime</code>; font files and placements are under <code>Kit/Resources/ballbreaker/kit</code>. Keep resource paths unless you update every matching code reference.</p>
+<p>Change Company Name, Product Name, Version and the Android application identifier in Player Settings to values you control. Do not publish under <code>com.satisvizion.ballbreaker.demo</code>. Assign your own launcher/adaptive icon layers and review the splash screen, in-game title and other branding. Increase Android Bundle Version Code for each released update. Test UI fit, text and touch targets on an actual phone.</p>
+<h2>LiveOps, ads and haptics</h2>
+<p>The publisher-owned <strong>HyperCasual LiveOps Kit</strong> is included. <a href="HyperCasualLiveOpsKit.html">Read its complete offline manual</a>.</p>
+<p>Settings: <code>Assets/SatisVizionBallBreaker/HyperCasualLiveOpsKit/Resources/HLK/HLKSettings.asset</code>. Shipping defaults are <strong>Ads Mode Dummy (0)</strong> and <strong>IAP Mode Disabled (3)</strong>. Banner, interstitial and rewarded placements are simulations. <strong>No Google Mobile Ads, billing or other vendor SDK is included.</strong> Automatic vendor-SDK installers are disabled. The game's own Kit is required code, not an advertising SDK.</p>
+<p>To enable a real provider, separately install its official SDK, follow the kit manual, configure your own identifiers, consent and privacy policy, then test the selected platform and all cancellation/failure cases. Do not enable SDK symbols without the corresponding dependency. Optional kit modules are capabilities, not production services already configured for this game. Native vibration needs a supported device; browser haptics and other native services have platform limits.</p>
+<h2>Development controls</h2>
+<p>Open DEV, press F2/backquote, or use the kit's top-left multi-tap shortcut. The global panel supports level jumps, booster access, ads and haptics controls. Add <code>HZ_RELEASE</code> to scripting defines when you want these development controls excluded from a consumer build. This does not configure real ads or certify store readiness.</p>
+<h2>Android release</h2>
+<p>Use the Mobile scene, portrait orientation and ARM64/IL2CPP with matching Unity tools. The provided APK is a <strong>debug-signed development demo</strong>, not a production store release. For release turn off Development Build and debugging, choose your own application identifier and review current store API requirements.</p>
+<p>In Player → Publishing Settings create or select <strong>your own keystore and alias</strong>. Securely retain the keystore, alias and passwords for future updates; never redistribute signing secrets. Enable Build App Bundle for a Google Play AAB. Install a release candidate on a physical Android device and check touch, audio, haptics, pause/resume, saves and any enabled provider flows. Complete destination-store ads/data declarations and your privacy policy for the services actually enabled.</p>
+<h2>WebGL</h2>
+<p>Build the Mobile scene for a portrait-only demo with the built-in Default template and Brotli decompression fallback. Use <strong>Tools → Ball Breaker Physics → Create Responsive WebGL Page</strong> after building and select the output folder. This generates an original responsive page around the complete Build folder. Serve every loader, framework, data and WASM file over HTTP(S); <code>file://</code> is unsupported. Audio normally starts after a first click/tap.</p>
+<p>The two-scene landscape-first route supports <code>?mobile=1</code> to switch to the following Mobile scene. The included WebGL build menu uses HLK's non-development <strong>local showcase</strong> scope. It supports simulated demos; configure your production providers and resolve the kit build-doctor checks for a real service release.</p>
+<h2>Troubleshooting</h2>
+<ul>
+<li>Missing types: install the required packages and import all three roots, preserving <code>.meta</code> files.</li>
+<li>Pointer input exception: select Active Input Handling Both and restart Unity.</li>
+<li>Pink materials: use URP 17.0.4 and run the game's Setup command.</li>
+<li>Sparse scene in edit mode: world/UI objects are built at runtime; press Play.</li>
+<li>No real ad revenue: Dummy mode is simulated and no provider SDK is bundled.</li>
+<li>IAP is unavailable: it is deliberately Disabled by default; configure an official billing integration separately if you need it.</li>
+<li>Progress persists: use the development reset controls or deliberately clear this product's PlayerPrefs.</li>
+<li>WebGL does not load from a local file: serve the complete output over HTTP(S).</li>
+</ul>
+<h2>Licences and support</h2>
+<p>Retain the font, icon, TextMesh Pro and HLK licences and Third-Party Notices. See the game's <code>Third-Party Notices.txt</code> and <code>AI-DISCLOSURE.txt</code>. Marketing artwork is distinct from authentic gameplay captures. For product support use the marketplace item support channel or contact SatisVizion at satisvizion@gmail.com.</p></main></html>
