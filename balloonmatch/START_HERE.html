@@ -1,0 +1,142 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>HyperCasual LiveOps Kit guide</title><style>body{font:16px/1.65 system-ui;max-width:1000px;margin:40px auto;padding:0 24px}pre{white-space:pre-wrap;background:#eef3f8;padding:18px}table{border-collapse:collapse}td,th{border:1px solid #bbc;padding:8px}img{max-width:100%}</style><h1>Start Here: From Import to a Validated Game</h1>
+<p>This is the shortest reliable route through HyperCasual LiveOps Kit V2. Start with
+<strong>Tools &gt; HLK &gt; Start Here</strong> in Unity. The Toolset Overview mirrors the five steps
+below and keeps every action one click away.</p>
+<h2>1. Shape the game-facing sample</h2>
+<p>Open <strong>Tools &gt; HLK &gt; Game Setup Assistant</strong>. Use it for the parts a game designer
+expects first: menu/gameplay scenes, levels, rewards, goals, minigames, offers,
+battle pass, economy data, and the portrait Starter Menu.</p>
+<p>The Feature Dashboard and Starter Menu serve different purposes:</p>
+<ul>
+<li><strong>Feature Dashboard Demo</strong> is a broad API and deterministic-simulation showcase.</li>
+<li><strong>Portrait Starter Menu</strong> is the integrated, player-facing sample to adapt into a game.</li>
+</ul>
+<p>Both are listed as samples in <code>package.json</code> and both remain sample code/data. Do
+not treat sample identifiers, products, rewards, or simulated provider results as
+release configuration.</p>
+<h2>2. Create editable starter data</h2>
+<p>Use <strong>Generate Missing Starter Assets</strong> from Start Here or
+<strong>Tools &gt; HLK &gt; Generate Starter Config Assets</strong>. The generator fills missing
+references; review and rename the resulting catalogs and replace placeholder
+values before release.</p>
+<p>Keep the package presets as references. Put game-owned variants in a project-owned
+folder when you expect to update or replace the asset later.</p>
+<h2>3. Choose and configure modules</h2>
+<p>Use <strong>Complete V2</strong> as a searchable module map, then open a module's current tab
+when one exists. The categories mean:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>What belongs there</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Monetization</td>
+<td>Ads, IAP, offers, receipt/promotion authority</td>
+</tr>
+<tr>
+<td>Engagement</td>
+<td>Goals, quests, gifts, battle pass, energy, rate prompts</td>
+</tr>
+<tr>
+<td>Platform</td>
+<td>Identity-facing services, cloud, links, push, updates, game services</td>
+</tr>
+<tr>
+<td>UI &amp; Feedback</td>
+<td>Audio, haptics, localization, native UI, sharing, web surfaces</td>
+</tr>
+<tr>
+<td>Data &amp; Setup</td>
+<td>Analytics, consent, permissions, crash reporting, app identity</td>
+</tr>
+<tr>
+<td>Complete V2</td>
+<td>Contract/domain inventory, dependencies, authority, and support evidence</td>
+</tr>
+</tbody>
+</table>
+<p>Configure only what the game needs. Dummy, Test, Simulated, and LocalPrototype
+paths are development tools. Explicit Production/provider paths do not silently
+turn into successful simulation when a required SDK or authority is absent.</p>
+<p>For AdMob, open the <strong>Ads</strong> tab, expand <strong>Google AdMob — direct</strong>, and select
+<strong>Install AdMob SDK</strong>. After confirmation, HLK adds the official OpenUPM registry
+and its tested Google Mobile Ads UPM dependency; no OpenUPM CLI or manual scoped-
+registry entry is required. The installer refuses to mix a legacy <code>.unitypackage</code>
+copy with UPM and keeps a backup of the previous manifest under <code>Library</code>.</p>
+<h2>4. Clear local blockers</h2>
+<p>For the Remote Config tutorial, keep <strong>Fetch automatically on init</strong> enabled,
+publish a parameter, then restart the app / Play Mode and inspect active values.
+Startup attempts a fetch and activation; offline/failure retains cached/default
+data. Restarting is not a guarantee of fresh server values. Existing opt-out
+settings are respected. There is no automatic session polling.</p>
+<p>The Remote Config panel is ordered **Source &gt; Lifecycle &gt; Active keys &gt; key input</p>
+<blockquote>
+<p>Typed reads**. Lifecycle provides Register defaults and one <strong>Pull config and
+apply (Force)</strong> action. Force requires confirmation and, in a player build,
+<strong>HLK_REMOTE_CONFIG_QA</strong>. Remove that define before publishing; no Development
+Build is needed. Force leaves Firebase's global settings and shared app intact.
+An active server throttle is displayed as a countdown and blocks retries until
+expiry. Success hides irrelevant failure details; unset timestamps are omitted.
+The panel refreshes its active-value display automatically. Recovery of an
+interrupted override from an older kit is retained for safe upgrades.</p>
+</blockquote>
+<p>Same-session Firebase hot updates remain unverified. Use diagnostics and a
+minimal Firebase sample on the same SDK/platform to investigate further, rather
+than lowering production settings. RemoteValue can be cached; activation false
+does not prove throttling. Keep a nonzero release cache window.</p>
+<p>There are three different validators; they are not interchangeable:</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Audience</th>
+<th>What it proves</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Game Setup validation</td>
+<td>Game developer/designer</td>
+<td>Scenes and game-facing asset references are coherent</td>
+</tr>
+<tr>
+<td>Toolset static preflight / Build Doctor</td>
+<td>Game developer/release engineer</td>
+<td>Locally inspectable settings, compile markers, required files, and release-policy gates</td>
+</tr>
+<tr>
+<td>Distributable package validation</td>
+<td>Asset maintainer</td>
+<td>The package being exported has clean metadata, paths, GUIDs, secrets policy, and export inventory</td>
+</tr>
+</tbody>
+</table>
+<p>Customer projects normally use the first two. Package validation/export, dependency
+repair, and generated-artifact cleanup are grouped under <strong>Tools &gt; HLK &gt; Maintainer</strong>
+because they maintain this distributable rather than configure a game. Reproducible
+sample showcase builders remain under <strong>Tools &gt; HLK &gt; V2</strong> and reject Unity
+Development builds.</p>
+<h2>5. Prove external behavior</h2>
+<p>A green editor result is not production certification. Before release, separately:</p>
+<ol>
+<li>Deploy and authenticate customer-owned backend authority.</li>
+<li>Verify purchases and promotion redemption with idempotent server fulfillment.</li>
+<li>Configure provider dashboards, app identifiers, credentials, products, and callbacks.</li>
+<li>Exercise store sandboxes/internal tracks with test accounts.</li>
+<li>Validate consent, permissions, notifications, links, native UI, sharing, and
+   failure/offline behavior on every supported device family.</li>
+<li>Record the provider/device/build evidence required by your release process.</li>
+</ol>
+<h2>Updating an existing installation</h2>
+<p>Before importing a new major version, run <strong>Tools &gt; HLK &gt; Migration &gt; Pre-Upgrade
+Backup and Scan...</strong> and choose a user-owned destination outside the package. Use
+the dry run first if you only want an inventory/report. Migration never replaces
+provider-console exports, store records, or normal source control backups.</p>
+<h2>Where to go next</h2>
+<ul>
+<li><code>Documentation.html</code> — complete module/API manual.</li>
+<li><code>V2_IMPLEMENTATION_GUIDE.md</code> — architecture and integration examples.</li>
+</ul></html>
